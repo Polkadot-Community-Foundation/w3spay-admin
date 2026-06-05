@@ -1,27 +1,8 @@
-/**
- * Tests for `publishItemConfig` — the host-delegated publish path.
- *
- * Scope: covers the contract between the app and the host's preimage
- * submitter. The host itself is mocked via the `preimage` and `inHost`
- * injection points exposed for testing; we do not exercise the
- * product-sdk transport.
- *
- * Invariants asserted here:
- *   - the submitter receives the exact encoded envelope bytes
- *     (re-encoding would silently desync the on-chain CID)
- *   - the host's returned preimage key MUST match blake2b-256 of those
- *     bytes; mismatch fails loudly so a bad host never poisons the
- *     registry contract with a CID nothing can resolve
- *   - outside a host environment we refuse to call the submitter at all
- *   - on host rejection, the thrown Error preserves the host's `reason`
- *     and the original cause
- */
-
 import { describe, expect, it, vi } from "vitest";
 import { blake2b } from "@noble/hashes/blake2.js";
 
-import { publishItemConfig, type PreimageSubmitter } from "@features/items/api/item-config-storage.ts";
-import { calculateBulletinCidObject } from "@features/items/api/cid.ts";
+import { publishItemConfig, type PreimageSubmitter } from "@features/items/contracts/item-config-storage.ts";
+import { calculateBulletinCidObject } from "@features/items/contracts/cid.ts";
 import type { ItemConfig } from "@features/items/items-model.ts";
 
 const CONFIG: ItemConfig = {

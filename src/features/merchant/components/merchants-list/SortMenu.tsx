@@ -1,8 +1,5 @@
-/**
- * Sort dropdown for the merchants directory. The select is styled to
- * match the chip row visually (rounded pill, chevron icon as background
- * image so we don't depend on the platform's native arrow).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "@shared/components/tokens.ts";
 import type { MerchantSort } from "./types.ts";

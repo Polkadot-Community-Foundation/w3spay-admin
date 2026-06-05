@@ -1,10 +1,3 @@
-/**
- * Rotate the payout destination for an existing W3SPay terminal via
- * pallet-revive. Touches ONLY the destination — `displayName` and
- * lifecycle status are preserved. Use `w3spay-update-merchant` when you
- * need to change both fields in the same tx.
- */
-
 import { parseArgv, requireArg } from "./lib/argv";
 import { formatStatus, parseDestinationAccountId } from "./lib/destination";
 import {

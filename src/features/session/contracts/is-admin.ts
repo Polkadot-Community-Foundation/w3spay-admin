@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
+import { readContract } from "@/shared/chain/contracts";
+
+import { envConfig } from "@/config";
+import { useMainClient } from "@shared/chain/use-client.ts";
+import { withTimeout } from "@shared/utils/with-timeout.ts";
+import { normalizeH160Address } from "@shared/lib/address.ts";
+import { W3SPayMerchantRegistryABI } from "@shared/chain/registry-abi.ts";
+
+const CHECK_TIMEOUT_MS = 60_000;
+
+export type IsAdminState =
+  | { kind: "idle" }
+  | { kind: "checking" }
+  | { kind: "granted" }
+  | { kind: "denied" }
+  | { kind: "error"; reason: string };
+
+export interface UseIsAdminResult {
+  state: IsAdminState;
+  inFlight: boolean;
+  granted: boolean;
+  refresh(): Promise<void>;
+}
+
+/**
+ * Wraps the dry-run `readContract` in a 60s timeout — a wedged host transport
+ * otherwise leaves the gate spinning forever. `useMainClient()` is a process-wide
+ * singleton getter (despite the `use` prefix), so this stays a plain async
+ * function callable from a query's `queryFn`.
+ */
+export async function checkIsAdmin(
+  adminH160: string,
+  registryAddress: string,
+): Promise<boolean> {
+  const [granted] = await withTimeout(
+    readContract<[boolean]>(useMainClient().client, {
+      address: registryAddress.toLowerCase() as `0x${string}`,
+      abi: W3SPayMerchantRegistryABI,
+      functionName: "isAdmin",
+      args: [normalizeH160Address(adminH160)],
+      origin: envConfig.chain.readOnlyOrigin,
+      at: "best",
+    }),
+    CHECK_TIMEOUT_MS,
+    "registry isAdmin",
+  );
+  return granted;
+}

@@ -1,7 +1,5 @@
-/**
- * Soft body-copy block used inside access-gate cards. Pulls text away
- * from the eyebrow line at the top of the card.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

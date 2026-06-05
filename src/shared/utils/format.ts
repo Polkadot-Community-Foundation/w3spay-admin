@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 export function shortenAddress(value: string | null | undefined, start = 8, end = 6): string {
   if (!value) return "—";
   if (value.length <= start + end + 1) return value;

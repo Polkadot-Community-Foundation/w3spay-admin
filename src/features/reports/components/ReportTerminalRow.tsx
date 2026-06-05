@@ -1,25 +1,14 @@
-/**
- * Single terminal row in the top-level Reports list.
- *
- * Renders merchant name + terminal snippet + a small data triad:
- * report count, most recent date, assignment-readiness flag (red when
- * the admin has no QR-issued password on file — the row will still load
- * the chain index but won't be able to decrypt anything).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { type AdminMerchant } from "@features/merchant/merchant-model.ts";
-import type { TerminalReportIndex } from "@features/reports/api/bulletin-index-read.ts";
+import type { TerminalReportIndex } from "@features/reports/contracts/bulletin-index-read.ts";
 import { Icon } from "@shared/components/Icon.tsx";
 import { ACard, AMono, AStatus } from "@shared/components/primitives.tsx";
 import { COLOR, FONT } from "@shared/components/tokens.ts";
 
 export interface ReportTerminalRowProps {
   readonly m: AdminMerchant;
-  /**
-   * Resolved index for this terminal, or `null` when the lookup failed
-   * for this row (other rows may still have loaded). `undefined` is
-   * never passed in — pre-load state lives on the parent.
-   */
   readonly index: TerminalReportIndex | null;
   readonly hasAssignment: boolean;
   readonly onClick: () => void;

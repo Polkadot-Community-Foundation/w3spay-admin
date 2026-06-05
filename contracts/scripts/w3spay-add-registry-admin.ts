@@ -1,10 +1,3 @@
-/**
- * Grant a new admin role on the W3SPay registry. Must be run by the owner.
- *
- * Inputs can be passed as CLI flags or W3SPAY_* env vars:
- *   W3SPAY_ADMIN=0xNewAdminH160 npx tsx scripts/w3spay-add-registry-admin.ts
- */
-
 import { parseArgv, requireArg } from "./lib/argv";
 import {
   createScriptContext,

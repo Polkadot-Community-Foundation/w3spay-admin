@@ -1,30 +1,15 @@
-/**
- * Minimal argv + env parser used by W3SPay admin scripts.
- *
- * Registry scripts normally run via `tsx`, so they can accept regular CLI
- * flags. Each script declares its inputs as `--<flag>` keys; we resolve them
- * in this order:
- *   1. `--flag=value` or `--flag value` in `process.argv`.
- *   2. Environment variable `W3SPAY_<FLAG>` with dashes uppercased to
- *      underscores.
- *
- * Example:
- *   --merchant-id   ↔  W3SPAY_MERCHANT_ID
- *   --admin         ↔  W3SPAY_ADMIN
- *   --display-name  ↔  W3SPAY_DISPLAY_NAME
- */
-
 export type Argv = Record<string, string>;
 
 const ENV_PREFIX = "W3SPAY_";
+const ENV_FLAG_USAGE =
+  "--env requires a value (e.g. paseo-next-v2 | previewnet)";
 
 function envKeyFor(flag: string): string {
   return ENV_PREFIX + flag.replace(/-/g, "_").toUpperCase();
 }
 
-export function parseArgv(): Argv {
+export function parseArgv(raw = process.argv.slice(2)): Argv {
   const out: Argv = {};
-  const raw = process.argv.slice(2);
   for (let i = 0; i < raw.length; i += 1) {
     const token = raw[i];
     if (!token.startsWith("--")) continue;
@@ -38,22 +23,72 @@ export function parseArgv(): Argv {
       out[token.slice(2)] = next;
       i += 1;
     } else {
-      // Bare flag — treat as true.
       out[token.slice(2)] = "true";
     }
   }
   return out;
 }
 
-/**
- * Look up a script argument, preferring an explicit CLI flag and falling back
- * to the `W3SPAY_<FLAG>` env var. Returns `undefined` when neither is set.
- */
 export function readArg(argv: Argv, key: string): string | undefined {
   const fromCli = argv[key];
   if (fromCli != null && fromCli.length > 0) return fromCli;
   const fromEnv = process.env[envKeyFor(key)];
   if (fromEnv != null && fromEnv.length > 0) return fromEnv;
+  return undefined;
+}
+
+function npmConfigKeyFor(flag: string): string {
+  return `npm_config_${flag.replace(/-/g, "_").toLowerCase()}`;
+}
+
+function readNpmConfigArg(key: string): string | undefined {
+  const value = process.env[npmConfigKeyFor(key)];
+  if (value == null || value.length === 0 || value === "true") return undefined;
+  return value;
+}
+
+export function parseEnvSelector(
+  argv: string[],
+  supportedNetworks: readonly string[],
+): string | undefined {
+  const raw = argv.slice(2);
+  for (let i = 0; i < raw.length; i += 1) {
+    const token = raw[i];
+    if (token === "--env") {
+      const value = raw[i + 1];
+      if (!value || value.startsWith("--")) {
+        throw new Error(ENV_FLAG_USAGE);
+      }
+      return value;
+    }
+    if (token.startsWith("--env=")) {
+      const value = token.slice("--env=".length);
+      if (!value) {
+        throw new Error(ENV_FLAG_USAGE);
+      }
+      return value;
+    }
+  }
+
+  const npmEnv = readNpmConfigArg("env");
+  if (npmEnv != null) return npmEnv;
+
+  for (let i = 0; i < raw.length; i += 1) {
+    const token = raw[i];
+    if (token === "--") continue;
+    if (token.startsWith("--")) {
+      if (
+        !token.includes("=") &&
+        raw[i + 1] != null &&
+        !raw[i + 1].startsWith("--")
+      ) {
+        i += 1;
+      }
+      continue;
+    }
+    if (supportedNetworks.includes(token)) return token;
+  }
+
   return undefined;
 }
 

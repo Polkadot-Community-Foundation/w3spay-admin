@@ -1,20 +1,5 @@
-/**
- * W3sPay admin — item-catalogue domain types and pure helpers.
- *
- * A `ItemConfig` is a named price list (e.g. "Bar", "Restaurant") that a
- * cashier-facing terminal pulls down at startup. Configs are now flat
- * `Item` lists; categories were removed from the model when item configs
- * moved to the W3SPay/T3rminal QR contract — terminals render the items
- * in storage order and the admin app does not group them.
- *
- * Bulletin envelopes, QR payloads, and on-disk drafts use this exact
- * shape. Legacy `{ categories: [...] }` configs from older devbuilds are
- * still decoded by `normalizeLegacyItemConfigShape` so a stored draft
- * from the previous model loads into the new UI.
- *
- * This module contains only types and value-pure helpers — no React, no
- * I/O, no smart-contract calls.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 /** Price denomination — CASH, expressed as a non-negative decimal number. */
 export type CASH = number;
@@ -35,8 +20,6 @@ export interface ItemConfig {
   /** ISO timestamp of the last mutation; updated by every write. */
   readonly updatedAt: string;
 }
-
-// ── Pure helpers ────────────────────────────────────────────────────
 
 /** Return the items of a config — kept as a function so legacy callers compile cleanly. */
 export function configFlatItems(c: ItemConfig | null | undefined): ReadonlyArray<Item> {
@@ -85,8 +68,6 @@ export function parsePriceInput(raw: string): CASH | null {
   if (value < 0) return null;
   return value;
 }
-
-// ── Legacy compatibility ────────────────────────────────────────────
 
 /** Subset of the old category-shaped config we still know how to decode. */
 interface LegacyCategoryItem {

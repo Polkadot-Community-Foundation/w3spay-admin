@@ -6,13 +6,6 @@ import type { ItemConfig } from "@features/items/items-model.ts";
 import type { PublishedConfigSnapshot } from "@features/items/item-config-drafts.ts";
 import { ItemsDetail } from "@features/items/components/ItemsDetail.tsx";
 
-/**
- * The detail view grew an inline "Save & publish" affordance so the
- * operator can publish the config in front of them. It must appear only
- * when the config actually has unsaved changes — otherwise it is noise.
- * These render assertions pin that gating (and the in-flight label).
- */
-
 const CONFIG: ItemConfig = {
   id: "drinks",
   name: "Drinks",

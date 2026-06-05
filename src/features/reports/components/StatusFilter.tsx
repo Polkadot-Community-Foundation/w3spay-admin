@@ -1,8 +1,5 @@
-/**
- * Status filter chip group — All / Finished / Refunded. Pure UI; the
- * matching predicate lives in `TransactionsView` so the filter logic
- * stays alongside the visible pagination state.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { SegmentedChips } from "./SegmentedChips.tsx";
 

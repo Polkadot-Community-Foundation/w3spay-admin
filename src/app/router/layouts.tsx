@@ -1,44 +1,30 @@
-/**
- * Root layout — the app chrome (wordmark rail, tab bar, scroll frame,
- * demo banner, feedback toast, screen-transition animation).
- *
- * `RootLayout` mounts the single host-wallet subscription via
- * `useSessionSync` (EXACTLY once, at the root) and renders `Shell`. It
- * reads session + registry state through feature hooks (`useSession`,
- * `useMerchants`) — there is no product context provider. The access
- * gate lives in `./guards.tsx`.
- *
- * Tab + tab-bar visibility come from each route's `staticData`; the
- * animation key is the pathname so a route (or `$param`) change
- * retriggers the screen-in transition.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect } from "react";
 import { Outlet, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 
-import { envConfig } from "@shared/config.ts";
-import { journeyTracker } from "@shared/utils/telemetry.ts";
-import { isDemoMode } from "@shared/demo/demo-mode.ts";
-import { useSession } from "@features/session/api/use-session.ts";
-import { useSessionSync } from "@features/session/api/use-session-sync.ts";
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
+import { envConfig } from "@/config.ts";
+import { journeyTracker } from "@shared/lib/telemetry.ts";
+import { isDemoMode } from "@shared/lib/demo/demo-mode.ts";
+import { useSession } from "@features/session/contracts/use-session.ts";
+import { useSessionSync } from "@features/session/contracts/use-session-sync.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
 import { useGateVerdict } from "./guards.tsx";
 import { DemoModeBanner } from "@shared/components/DemoModeBanner.tsx";
 import { FeedbackToast } from "@shared/components/FeedbackToast.tsx";
 import { AFrame, ARail, ATabs } from "@shared/components/primitives.tsx";
-import { DebugPanel } from "@/shared/api/host/debug/index.ts";
+import { DebugPanel } from "@/shared/chain/host/debug/index.ts";
 import { TABS, TAB_DEFAULT_PATH, type TabId } from "./routes.ts";
 
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
     tab?: TabId;
-    /** Whether the top tab bar shows on this route (default true). */
     showTabs?: boolean;
   }
 }
 
 export function RootLayout() {
-  // Single host-wallet subscription + permissions probe + boot telemetry.
   useSessionSync();
   return <Shell />;
 }
@@ -62,10 +48,9 @@ function Shell() {
     void router.invalidate();
   }, [router, readyAccount]);
 
-  // Telemetry: surface the merchant-registry milestone for the app-boot
-  // journey. Fires once when the registry transitions out of `loading`
-  // (relocated here from the former merchant-contract provider so it
-  // still fires exactly once — Shell is mounted once at the root).
+  // Surface the merchant-registry milestone for the app-boot journey.
+  // Fires once when the registry leaves `loading`; Shell mounts once at the
+  // root, so this fires exactly once.
   useEffect(() => {
     if (!journeyTracker.isActive("app-boot")) return;
     if (registry.kind === "loading") return;

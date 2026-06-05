@@ -1,7 +1,5 @@
-/**
- * Tiny counter pill (label + value with optional status dot) shown in
- * the merchants directory header.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { AMono } from "@shared/components/primitives.tsx";
 import { COLOR } from "@shared/components/tokens.ts";

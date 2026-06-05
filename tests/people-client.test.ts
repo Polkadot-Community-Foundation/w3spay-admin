@@ -1,19 +1,9 @@
-/**
- * `usePeopleClient` — provider branch.
- *
- * The CASH balance read behind the Balances tab MUST talk to the people-system
- * parachain (where the foreign asset lives), not the main Asset Hub chain.
- * These tests pin that `usePeopleClient` resolves its endpoint from
- * `NetworkConfig.peopleChain` — guarding the regression that repointed it at
- * `mainChain` (which still lurks in `apps/w3spay/src/host/client.ts`).
- */
-
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type * as Sdk from "@/sdk";
+import type * as Sdk from "@shared/chain/host";
 // Static import: `vi.mock` is hoisted above imports by vitest, and the shared
 // state below is created with `vi.hoisted`, so the mocks are active before
-// `@shared/api/client.ts` is evaluated — no `await import()` needed.
-import { usePeopleClient } from "@shared/api/client.ts";
+// `@shared/chain/client.ts` is evaluated — no `await import()` needed.
+import { usePeopleClient } from "@shared/chain/client.ts";
 
 const m = vi.hoisted(() => {
   const peopleEndpoint = { wsUrl: "wss://people.example", genesisHash: "0xpeoplegenesis" };
@@ -35,7 +25,7 @@ const m = vi.hoisted(() => {
   };
 });
 
-vi.mock("@shared/api/host-connection.ts", () => ({
+vi.mock("@shared/chain/host-connection.ts", () => ({
   isInHost: m.isInHost,
   detectHostEnvironment: () => (m.isInHost() ? "web-iframe" : "standalone"),
   isDevStandalone: () => false,
@@ -44,7 +34,7 @@ vi.mock("@shared/api/host-connection.ts", () => ({
   isHostConnected: vi.fn(() => false),
 }));
 
-vi.mock("@/sdk", async (importOriginal) => {
+vi.mock("@shared/chain/host", async (importOriginal) => {
   const orig = await importOriginal<typeof Sdk>();
   return {
     ...orig,
@@ -63,7 +53,7 @@ vi.mock("@/sdk", async (importOriginal) => {
   };
 });
 
-vi.mock("@shared/config.ts", () => ({
+vi.mock("@/config", () => ({
   envConfig: { chain: { network: "paseo-next-v2", readOnlyOrigin: "" } },
 }));
 

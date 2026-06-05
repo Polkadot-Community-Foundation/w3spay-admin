@@ -1,24 +1,8 @@
-/**
- * Round-trip tests for the hand-maintained `T3rminalBulletinIndex` ABI.
- *
- * Goal: catch typos in `apps/w3spay-admin/src/contract/bulletin-index-abi.ts`
- * before they reach the chain (where the failure surfaces as an opaque
- * "data: 0x" revert). We exercise:
- *
- *   1. Every view method we use encodes + decodes cleanly via
- *      `ethers.Interface` with realistic argument shapes.
- *   2. Selectors don't collide with the merchant registry ABI — the
- *      admin app talks to both contracts and a hash collision would
- *      silently dispatch the wrong handler.
- *   3. The event matches the chain's signature (matters when we wire up
- *      live event subscriptions later).
- */
-
 import { describe, expect, it } from "vitest";
 import { ethers } from "ethers";
 
-import { T3rminalBulletinIndexABI } from "@features/reports/api/bulletin-index-abi.ts";
-import { W3SPayMerchantRegistryABI } from "@shared/api/registry-abi.ts";
+import { T3rminalBulletinIndexABI } from "@features/reports/contracts/bulletin-index-abi.ts";
+import { W3SPayMerchantRegistryABI } from "@shared/chain/registry-abi.ts";
 
 const iface = new ethers.Interface(T3rminalBulletinIndexABI);
 const registryIface = new ethers.Interface(W3SPayMerchantRegistryABI);

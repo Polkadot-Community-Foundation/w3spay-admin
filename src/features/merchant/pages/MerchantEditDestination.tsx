@@ -1,21 +1,10 @@
-/**
- * Merchants tab — rotate the payout destination for an existing terminal.
- *
- * Touches ONLY the on-chain `destinationAccountId`. Display name and
- * lifecycle status are preserved by the dedicated `setMerchantDestination`
- * contract function. Cancelling navigates back to the merchant detail
- * view; submitting drives the write and, on success, returns there too.
- *
- * Form state is local — each visit is a fresh edit. The screen pre-fills
- * the destination field with the current SS58 so the admin can spot the
- * delta before submitting; pasting any of {SS58, AccountId32 hex, H160}
- * is accepted (same normalisation rules as `MerchantNew`).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect, useState } from "react";
 
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
-import { useMerchantWriteOps } from "@features/merchant/api/use-merchant-write-ops.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
+import { useMerchantWriteOps } from "@features/merchant/contracts/use-merchant-write-ops.ts";
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { type AdminMerchant, shortAddr } from "@features/merchant/merchant-model.ts";
 import { Icon } from "@shared/components/Icon.tsx";
@@ -39,13 +28,10 @@ export function MerchantEditDestination({ m }: MerchantEditDestinationProps) {
   const router = useRouter();
   const canGoBack = useCanGoBack();
 
-  // Pre-fill with the canonical SS58 so the admin can see at a glance
-  // what they're replacing. They can paste any supported format over it.
   const [destination, setDestination] = useState<string>(() => m?.destinationSs58 ?? "");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Reset whenever a different merchant arrives via the route.
     setDestination(m?.destinationSs58 ?? "");
     setError(null);
     writes.resetSubmit();

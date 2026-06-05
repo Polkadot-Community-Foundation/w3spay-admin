@@ -1,13 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 /**
  * Local T3rminal merchant ↔ item-config assignments as a Zustand store
  * (host-KV / localStorage backed). Replaces the `useT3rminalAssignments`
  * hook.
  *
- * Same persistence model as the restaurants store: explicit async
- * `hydrate()` (read once) + synchronous write-through on every mutation —
- * NOT zustand's async `persist` middleware, which would lose writes made
- * right before a navigate-away. `mintAssignmentRecord` (the password /
- * salt derivation) stays a pure helper in `lib/data`.
  */
 
 import { useEffect } from "react";

@@ -1,33 +1,19 @@
-/**
- * Local item-config drafts as a Zustand store (host-KV / localStorage
- * backed) — the *local half* of the former `useItemConfigs` hook.
- *
- * Owns the editable `configs` array and the pure config/item mutations
- * (create / duplicate / delete / upsertItem / deleteItem). The published
- * registry read (snapshots + poll) is now a TanStack Query
- * (`lib/query/item-config-queries`) and the publish flow is a mutation
- * (`lib/query/item-config-mutations`); `dirtyConfigIds`, `saveAllChanged`,
- * and `publishProgress` are composed at the consumer from those + this
- * store.
- *
- * Same persistence model as the other KV stores: async `hydrate()` once
- * (decode or fall back to the seed) + synchronous write-through after
- * each successful mutation. Persist is gated on `hydrated` so an early
- * mutation can't clobber stored drafts with the seed.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect } from "react";
 import { create } from "zustand";
 
-import { captureError } from "@/shared/telemetry";
+import { captureError } from "@/shared/lib/sentry";
 
 import { cachedAdminKvStore, getAdminKvStore } from "@shared/store/admin-kv.ts";
 import {
   ITEM_CONFIG_DRAFTS_KEY,
-  decodeDraftsOrFallback,
+  decodeDraftsPayload,
   encodeDraftsPayload,
+  reconcilePublishedConfigs,
+  type PublishedConfigSnapshot,
 } from "@features/items/item-config-drafts.ts";
-import { ITEM_CONFIGS_SEED } from "@features/items/items-mock.ts";
 import type { Item, ItemConfig } from "@features/items/items-model.ts";
 import {
   createConfig as createConfigFn,
@@ -44,10 +30,14 @@ import {
 
 export interface ItemDraftsState {
   readonly configs: ReadonlyArray<ItemConfig>;
+  /** Reconcile baseline — the published body each draft was last synced
+   *  against. Persisted with the drafts; never bumped by local edits. */
+  readonly base: ReadonlyMap<string, ItemConfig>;
   readonly hydrated: boolean;
   readonly writeInFlight: boolean;
   readonly lastError: MutationError | null;
   hydrate(): Promise<void>;
+  reconcilePublished(snapshots: ReadonlyMap<string, PublishedConfigSnapshot>): void;
   resetError(): void;
   createConfig(args: { name: string; id: string }): Promise<MutationResult>;
   duplicateConfig(sourceId: string, args: { name: string; id: string }): Promise<MutationResult>;
@@ -58,13 +48,17 @@ export interface ItemDraftsState {
 
 let hydrating: Promise<void> | null = null;
 
-function persistDrafts(configs: ReadonlyArray<ItemConfig>, hydrated: boolean): void {
+function persistDrafts(
+  configs: ReadonlyArray<ItemConfig>,
+  base: ReadonlyMap<string, ItemConfig>,
+  hydrated: boolean,
+): void {
   // Don't persist before hydration — would clobber stored drafts with
-  // the seed if a mutation lands in the hydrate window.
+  // the empty initial state if a mutation lands in the hydrate window.
   if (!hydrated) return;
   const store = cachedAdminKvStore();
   if (store == null) return;
-  void store.setJSON(ITEM_CONFIG_DRAFTS_KEY, encodeDraftsPayload(configs));
+  void store.setJSON(ITEM_CONFIG_DRAFTS_KEY, encodeDraftsPayload(configs, [...base.values()]));
 }
 
 export const useItemDraftsStore = create<ItemDraftsState>((set, get) => {
@@ -82,7 +76,7 @@ export const useItemDraftsStore = create<ItemDraftsState>((set, get) => {
         return Promise.resolve(result);
       }
       set({ configs: result.configs });
-      persistDrafts(result.configs, get().hydrated);
+      persistDrafts(result.configs, get().base, get().hydrated);
       return Promise.resolve(result);
     } finally {
       set({ writeInFlight: false });
@@ -90,7 +84,8 @@ export const useItemDraftsStore = create<ItemDraftsState>((set, get) => {
   };
 
   return {
-    configs: ITEM_CONFIGS_SEED,
+    configs: [],
+    base: new Map<string, ItemConfig>(),
     hydrated: false,
     writeInFlight: false,
     lastError: null,
@@ -106,11 +101,20 @@ export const useItemDraftsStore = create<ItemDraftsState>((set, get) => {
         }
         try {
           const raw = await store.getJSON<unknown>(ITEM_CONFIG_DRAFTS_KEY);
-          set({ configs: decodeDraftsOrFallback(raw, ITEM_CONFIGS_SEED) });
+          const decoded = decodeDraftsPayload(raw);
+          // A null decode means no persisted drafts → stay empty until
+          // `reconcilePublished` adopts the registry. v1 payloads decode
+          // with `base = configs` (see `decodeDraftsPayload`).
+          if (decoded !== null) {
+            set({
+              configs: decoded.configs,
+              base: new Map(decoded.base.map((config) => [config.id, config])),
+            });
+          }
         } catch (caught) {
           console.warn("[items] draft hydrate failed", caught);
-          // Degrades the Items tab to seed-only — the admin's prior
-          // edits vanish, so this is a real bug worth capturing.
+          // Degrades the Items tab to empty — the admin's prior edits
+          // vanish, so this is a real bug worth capturing.
           captureError(caught, { subsystem: "item-configs", op: "hydrate" });
         } finally {
           set({ hydrated: true });
@@ -120,6 +124,19 @@ export const useItemDraftsStore = create<ItemDraftsState>((set, get) => {
     },
 
     resetError: () => set({ lastError: null }),
+
+    reconcilePublished: (snapshots) => {
+      // Registry → drafts sync. Runs on every poll: a fresh device adopts
+      // the published menu; afterwards a three-way merge converges on
+      // published changes from other devices while keeping in-progress
+      // local edits (see `reconcilePublishedConfigs`).
+      const { hydrated, configs, base } = get();
+      if (!hydrated) return;
+      const result = reconcilePublishedConfigs(configs, base, snapshots);
+      if (result === null) return;
+      set({ configs: result.configs, base: result.base });
+      persistDrafts(result.configs, result.base, true);
+    },
 
     createConfig: (args) => runMutation((current, now) => createConfigFn(current, args, now)),
     duplicateConfig: (sourceId, args) =>
@@ -132,7 +149,7 @@ export const useItemDraftsStore = create<ItemDraftsState>((set, get) => {
   };
 });
 
-/** Triggers draft hydration on mount. Returns nothing — read slices via
+/** Triggers draft hydration on mount.
  * `useItemDraftsStore(selector)` at the call site. */
 export function useHydrateItemDrafts(): void {
   const hydrate = useItemDraftsStore((s) => s.hydrate);

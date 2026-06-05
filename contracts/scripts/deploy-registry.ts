@@ -1,14 +1,7 @@
 /**
- * Deploy W3SPayMerchantRegistry via pallet-revive instantiate_with_code.
- *
- * This intentionally does not use Hardhat Ignition or the EVM JSON-RPC path:
- * it targets the same PAPI network registry as the admin app, so deployments
- * land on the chain selected by NETWORK/--env (default: paseo-next-v2).
- *
- * Usage:
- *   DEPLOYER_SEED="twelve or twenty-four words ..." npm run deploy
- *   npm run deploy:paseo-next-v2
- *   npm run deploy -- --env previewnet
+ * Does not use Hardhat Ignition or the EVM JSON-RPC path: targets the same PAPI
+ * network registry as the admin app, so deployments land on the chain selected
+ * by NETWORK/--env (default: paseo-next-v2).
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -21,7 +14,11 @@ import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
 import { entropyToMiniSecret, mnemonicToEntropy } from "@polkadot-labs/hdkd-helpers";
 import { encodeAbiParameters, keccak256, type Abi, type AbiParameter } from "viem";
 
-import { resolveNetwork } from "../../src/sdk/host/index.ts";
+import {
+  resolveNetwork,
+  SUPPORTED_NETWORKS,
+} from "../../src/shared/chain/host/networks";
+import { parseEnvSelector } from "./lib/argv";
 
 const CONTRACTS_ROOT = resolve(__dirname, "..");
 const APP_ROOT = resolve(CONTRACTS_ROOT, "..");
@@ -66,13 +63,6 @@ function loadEnvFile(path: string): void {
   }
 }
 
-function parseEnvFlag(argv: string[]): string | undefined {
-  const index = argv.indexOf("--env");
-  if (index === -1) return undefined;
-  const value = argv[index + 1];
-  if (!value) throw new Error("--env requires a value (e.g. paseo-next-v2 | previewnet)");
-  return value;
-}
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -221,10 +211,9 @@ async function deployRegistry(api: any, signer: PolkadotSigner, origin: string, 
 }
 
 /**
- * Idempotently merge `values` into the dotenv file at `path`. Existing
- * comments, blank lines, and unrelated keys are preserved. When the
- * file doesn't exist yet, an optional `headerComment` is written first
- * so the freshly-created file isn't just a bag of `KEY=value` lines.
+ * Idempotently merge `values` into the dotenv file at `path`, preserving
+ * existing comments, blank lines, and unrelated keys. Writes `headerComment`
+ * first when creating a new file.
  */
 function upsertEnvFile(
   path: string,
@@ -262,7 +251,7 @@ function writeDeployment(networkKey: string, address: `0x${string}`, txHash: str
 
 async function main(): Promise<void> {
   loadEnvFile(resolve(CONTRACTS_ROOT, ".env"));
-  const cliEnv = parseEnvFlag(process.argv);
+  const cliEnv = parseEnvSelector(process.argv, SUPPORTED_NETWORKS);
   if (cliEnv) process.env.NETWORK = cliEnv;
 
   const network = resolveNetwork(process.env.NETWORK, {

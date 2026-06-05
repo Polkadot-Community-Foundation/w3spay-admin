@@ -1,9 +1,5 @@
-/**
- * Variant dispatcher for the access gate. Each `variant.kind` branch
- * renders the matching card (and, where relevant, the
- * `AdminAccountCard` below it so the maintainer can copy the H160 to
- * whitelist).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { ACard, AEye, APrimary, ASecondary } from "@shared/components/primitives.tsx";
 import { COLOR } from "@shared/components/tokens.ts";
@@ -20,7 +16,7 @@ export function AccessBody(props: AdminAccessProps) {
         <AEye>Host required</AEye>
         <Description>
           Open this app inside the Polkadot host (dotli, Polkadot Desktop,
-          or the Polkadot mobile app) to sign in with your product account.
+          or the Polkadot mobile app) to sign in.
         </Description>
       </ACard>
     );
@@ -32,8 +28,8 @@ export function AccessBody(props: AdminAccessProps) {
         <AEye>Connecting</AEye>
         <Description>
           {variant.kind === "requesting"
-            ? "Approve the sign-in request in your host wallet."
-            : "Resolving your product account…"}
+            ? "Approve the sign-in request in your wallet."
+            : "Signing you in…"}
         </Description>
       </ACard>
     );
@@ -44,12 +40,12 @@ export function AccessBody(props: AdminAccessProps) {
       <ACard padding={16}>
         <AEye>Sign in required</AEye>
         <Description>
-          Sign in through the host wallet to receive your admin grant
-          address. The contract owner must whitelist that address before
-          you can manage merchants.
+          Sign in to get your account address, then send it to your
+          administrator to be granted access before you can manage
+          merchants.
         </Description>
         <div style={{ height: 12 }} />
-        <APrimary onClick={props.onRequestAccess}>Request admin access</APrimary>
+        <APrimary onClick={props.onRequestAccess}>Request access</APrimary>
       </ACard>
     );
   }
@@ -58,10 +54,10 @@ export function AccessBody(props: AdminAccessProps) {
     return (
       <>
         <ACard padding={16}>
-          <AEye>Checking registry access</AEye>
+          <AEye>Checking access</AEye>
           <Description>
-            Your product account is resolved. Checking whether this H160 is
-            whitelisted as a W3sPay registry admin…
+            You're signed in. Checking whether your account has
+            access…
           </Description>
           <div style={{ height: 12 }} />
           <ASecondary onClick={props.onCheckAgain} disabled={props.checkInFlight}>
@@ -69,7 +65,7 @@ export function AccessBody(props: AdminAccessProps) {
           </ASecondary>
         </ACard>
         <div style={{ height: 12 }} />
-        <AdminAccountCard identity={variant.identity} title="Resolved application account" />
+        <AdminAccountCard identity={variant.identity} title="Your account" />
       </>
     );
   }
@@ -87,7 +83,7 @@ export function AccessBody(props: AdminAccessProps) {
         {variant.identity ? (
           <>
             <div style={{ height: 12 }} />
-            <AdminAccountCard identity={variant.identity} title="Resolved application account" />
+            <AdminAccountCard identity={variant.identity} title="Your account" />
           </>
         ) : null}
       </>
@@ -98,7 +94,7 @@ export function AccessBody(props: AdminAccessProps) {
     return (
       <>
         <ACard padding={16}>
-          <AEye color={COLOR.redSoft}>Could not contact registry</AEye>
+          <AEye color={COLOR.redSoft}>Could not verify access</AEye>
           <Description>{variant.reason}</Description>
           <div style={{ height: 12 }} />
           <ASecondary onClick={props.onCheckAgain}>Try again</ASecondary>
@@ -106,7 +102,7 @@ export function AccessBody(props: AdminAccessProps) {
         {variant.identity ? (
           <>
             <div style={{ height: 12 }} />
-            <AdminAccountCard identity={variant.identity} title="Resolved application account" />
+            <AdminAccountCard identity={variant.identity} title="Your account" />
           </>
         ) : null}
       </>
@@ -117,9 +113,9 @@ export function AccessBody(props: AdminAccessProps) {
     return (
       <>
         <ACard padding={16}>
-          <AEye color={COLOR.redSoft}>Host transport unavailable</AEye>
+          <AEye color={COLOR.redSoft}>Host unavailable</AEye>
           <Description>
-            The Polkadot host did not respond to a capability probe.
+            The Polkadot host isn't responding.
             {variant.reason ? ` ${variant.reason}.` : ""} Reopen this app from
             the host (dotli, Polkadot Desktop, or the mobile app) and try
             again.
@@ -135,7 +131,7 @@ export function AccessBody(props: AdminAccessProps) {
         {variant.identity ? (
           <>
             <div style={{ height: 12 }} />
-            <AdminAccountCard identity={variant.identity} title="Resolved application account" />
+            <AdminAccountCard identity={variant.identity} title="Your account" />
           </>
         ) : null}
       </>
@@ -146,10 +142,9 @@ export function AccessBody(props: AdminAccessProps) {
     return (
       <>
         <ACard padding={16}>
-          <AEye color={COLOR.redSoft}>Transaction broadcast permission denied</AEye>
+          <AEye color={COLOR.redSoft}>Permission needed</AEye>
           <Description>
-            The host denied permission to broadcast transactions
-            (<code>ChainSubmit</code>).
+            The host denied permission to submit transactions.
             {variant.reason ? ` ${variant.reason}.` : ""} Grant the permission
             to register or update merchants.
           </Description>
@@ -162,7 +157,7 @@ export function AccessBody(props: AdminAccessProps) {
           </APrimary>
         </ACard>
         <div style={{ height: 12 }} />
-        <AdminAccountCard identity={variant.identity} title="Resolved application account" />
+        <AdminAccountCard identity={variant.identity} title="Your account" />
       </>
     );
   }
@@ -178,17 +173,14 @@ export function AccessBody(props: AdminAccessProps) {
     );
   }
 
-  // not-admin
   return (
     <>
       <ACard padding={16}>
         <AEye>Not yet authorized</AEye>
         <Description>
-          You are signed in, but this product account is not a registry
-          admin. Send the H160 address below to the contract maintainer.
-          They will whitelist it via{" "}
-          <code>w3spay-add-registry-admin.ts</code>. Once granted, press{" "}
-          <strong>Check again</strong>.
+          You're signed in, but this account doesn't have access yet.
+          Send the address below to your administrator. Once they've
+          granted access, press <strong>Check again</strong>.
         </Description>
       </ACard>
 
@@ -196,7 +188,7 @@ export function AccessBody(props: AdminAccessProps) {
 
       <AdminAccountCard
         identity={variant.identity}
-        title="Send this H160 to the maintainer"
+        title="Send this address to your administrator"
       />
 
       <div style={{ height: 16 }} />

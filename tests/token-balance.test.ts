@@ -1,15 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { envConfig } from "@shared/config.ts";
-import type { AccountId32Hex } from "@shared/utils/address.ts";
+import { envConfig } from "@/config";
+import type { AccountId32Hex } from "@shared/lib/address.ts";
 import {
   fetchTokenBalance,
   formatTokenAmount,
   PeopleChainUnavailableError,
-} from "@features/balances/api/token-balance.ts";
+} from "@features/balances/contracts/token-balance.ts";
 
-// ── Mocks ─────────────────────────────────────────────────────────────────
-//
 // Shared mock state is created with `vi.hoisted` so it is initialised
 // alongside the (hoisted) `vi.mock` factories below. That lets the
 // module-under-test be imported with a normal static `import` while still
@@ -36,11 +34,11 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@shared/api/client.ts", () => ({
+vi.mock("@shared/chain/client.ts", () => ({
   usePeopleClient: () => mocks.ref.current,
 }));
 
-vi.mock("@shared/utils/address.ts", () => ({
+vi.mock("@shared/lib/address.ts", () => ({
   accountId32HexToSs58: mocks.accountId32HexToSs58,
 }));
 
@@ -59,15 +57,11 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-// ── config wiring ─────────────────────────────────────────────────────────
-
 describe("token config", () => {
   it("defaults to CASH", () => {
     expect(TOKEN_SYMBOL).toBe("CASH");
   });
 });
-
-// ── fetchTokenBalance ─────────────────────────────────────────────────────
 
 describe("fetchTokenBalance", () => {
   it("queries the people chain's Assets.Account with the token location + ss58 derived from the AccountId32", async () => {
@@ -100,8 +94,6 @@ describe("fetchTokenBalance", () => {
   });
 });
 
-// ── formatTokenAmount ─────────────────────────────────────────────────────
-
 describe("formatTokenAmount", () => {
   it("formats whole + fractional token amounts with 6-decimal planck input", () => {
     expect(formatTokenAmount(0n)).toBe("0.00");
@@ -115,7 +107,3 @@ describe("formatTokenAmount", () => {
     expect(formatTokenAmount(undefined)).toBe("—");
   });
 });
-
-// The former module-level `balanceCache` is gone — caching now lives in
-// the TanStack Query layer (`lib/query/balance-queries.ts`), so the
-// pure read fns above are the full surface this module still owns.

@@ -1,15 +1,5 @@
-/**
- * Pure item-level mutations for the catalogue store.
- *
- * Lives alongside `items-mutations.ts` so the config mutations file
- * stays under the 200-line budget. The shared helper surface
- * (`MutationResult`, `touch`, `replaceConfig`, `nowIso`) is re-used from
- * that module.
- *
- * Operations target `ItemConfig.items` directly — the legacy category
- * layer was removed when item configs moved to the flat QR-payload
- * contract.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { Item, ItemConfig } from "./items-model.ts";
 import { slugify } from "./items-model.ts";
@@ -60,8 +50,6 @@ export function deleteItem(
   }));
   return { ok: true, configs: replaceConfig(configs, next), result: next };
 }
-
-// ── Internals ───────────────────────────────────────────────────────
 
 function makeSku(config: ItemConfig): string {
   const taken = new Set(config.items.map((i) => i.id));

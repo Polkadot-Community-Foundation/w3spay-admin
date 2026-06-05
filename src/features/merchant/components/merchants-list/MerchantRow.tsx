@@ -1,8 +1,5 @@
-/**
- * Single merchant row in the directory. Editorial card with name +
- * IDs + truncated payout address, status pill, and (in comfortable
- * density) a relative-time stamp.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { shortAddr, timeAgoFromIso, type AdminMerchant } from "@features/merchant/merchant-model.ts";
 import { Icon } from "@shared/components/Icon.tsx";

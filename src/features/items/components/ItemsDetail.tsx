@@ -1,14 +1,5 @@
-/**
- * Items tab — single-config detail screen.
- *
- * Renders the flat item list, exposes config-level actions (duplicate,
- * add item, delete), and surfaces the published/dirty state captured by
- * the draft layer. The "configure T3rminal" flow lives on the
- * `MerchantDetail` screen — published configs are consumed there.
- *
- * Mutations are owned by the parent orchestrator; this view stays
- * presentational so it remains storybookable.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState } from "react";
 

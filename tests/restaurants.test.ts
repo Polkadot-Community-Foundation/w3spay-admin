@@ -1,19 +1,3 @@
-/**
- * Restaurant draft store contract.
- *
- * The store is the producer-side source of truth for what gets embedded
- * in the QR. The branching that can actually break:
- *   - form → wire: trims, drops blank optionals, and refuses (returns
- *     null) when id or name is blank.
- *   - wire → form: blank-fills absent optionals so inputs stay controlled.
- *   - persisted payload decode is defensive (corrupt KV never throws).
- *   - legacy-format migration: pre-rename `merchant-profiles/v1`
- *     payloads can still be folded into the new {@link Restaurant} map
- *     using their merchantId as the new restaurant id.
- *   - picker hint cache: stages a per-merchantKey hint that
- *     `consume()` claims exactly once and rejects for any other key.
- */
-
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
@@ -27,7 +11,7 @@ import {
   type Restaurant,
   type RestaurantForm,
 } from "@features/restaurants/restaurants.ts";
-import type { MerchantProfile } from "@/config-qr";
+import type { MerchantProfile } from "@shared/lib/config-qr";
 
 const FULL_FORM: RestaurantForm = {
   id: "funkhaus",

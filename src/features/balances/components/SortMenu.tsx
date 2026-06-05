@@ -1,8 +1,5 @@
-/**
- * Sort dropdown for the Balances tab. Visually identical to the
- * MerchantsList SortMenu but with its own option set (balance / recent /
- * name / status).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "@shared/components/tokens.ts";
 import type { BalanceSort } from "./sort.ts";

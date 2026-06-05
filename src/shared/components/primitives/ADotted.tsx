@@ -1,7 +1,5 @@
-/**
- * Dotted hairline divider drawn from a repeating radial-gradient. Used
- * inside cards to separate copyable rows.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "@shared/components/tokens.ts";
 

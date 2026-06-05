@@ -1,25 +1,5 @@
-/**
- * Single-line label / value row that copies its value to the clipboard
- * on click and truncates the value with an ellipsis if it overflows.
- *
- * Used across the terminal-details surfaces (`MerchantDetail`,
- * `PayoutBlock`, `ConfigureT3rminal`'s QR detail card, etc.) so every
- * displayed identifier — address, CID, terminalKey, timestamp — is one
- * tap away from the clipboard.
- *
- * Behaviour:
- *   - Right-side value uses `text-overflow: ellipsis` so long strings
- *     (SS58, hex hashes) don't push the layout sideways on narrow
- *     screens. Full value is exposed via the `title` attribute on
- *     hover and via the copy action.
- *   - Click anywhere on the row → `copyValue(value, copyField)`.
- *   - When `copiedField` matches, the icon flips to "check" and the
- *     value tint shifts to green for ~1.5s (the feedback context owns
- *     the timer).
- *   - When `value` is empty the row degrades to a muted "—" rendering
- *     and is non-interactive so we don't pollute the clipboard with
- *     empty strings.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 
@@ -31,12 +11,7 @@ export interface CopyableRowProps {
   readonly label: string;
   /** Stringified value used both for display and clipboard. */
   readonly value: string;
-  /**
-   * Optional override for what gets rendered when `value` is the
-   * canonical form but a friendlier display string exists (e.g. a
-   * formatted timestamp paired with a copyable ISO string). Defaults to
-   * `value`.
-   */
+  /** Friendlier rendered form when `value` is the canonical/copyable string. Defaults to `value`. */
   readonly display?: ReactNode;
   readonly mono?: boolean;
   /** Identifier passed to the feedback context for per-row copy state. */

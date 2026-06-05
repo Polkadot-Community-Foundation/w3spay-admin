@@ -1,19 +1,12 @@
-/**
- * Extracted terminals-list body shown in the Reports → Daily reports
- * segment. Lives in its own file so `Reports.tsx` is just the view
- * toggle + segment dispatch, not the per-terminal orchestration.
- *
- * Behaviour is the original `Reports` body: each row links into the
- * per-terminal drill-in, with a "no QR" warning on terminals that
- * haven't been issued a password yet.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { type AdminMerchant } from "@features/merchant/merchant-model.ts";
 import type { T3rminalAssignmentV1 } from "@shared/store/t3rminal-assignments.ts";
 import { useNavigate } from "@tanstack/react-router";
 import type {
   TerminalReportIndex,
-} from "@features/reports/api/bulletin-index-read.ts";
+} from "@features/reports/contracts/bulletin-index-read.ts";
 import { ACard } from "@shared/components/primitives.tsx";
 import { COLOR } from "@shared/components/tokens.ts";
 import { ReportTerminalRow } from "./ReportTerminalRow.tsx";
@@ -100,10 +93,6 @@ export function TerminalsList({
   );
 }
 
-/**
- * Terminals with reports first (newest most-recent date), then ones
- * without. Inside the "no reports" bucket, alphabetical by name.
- */
 function sortTerminals(
   terminals: ReadonlyArray<AdminMerchant>,
   indices: ReadonlyMap<`0x${string}`, TerminalReportIndex | null>,

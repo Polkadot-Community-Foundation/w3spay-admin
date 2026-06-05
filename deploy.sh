@@ -5,27 +5,29 @@
 # Usage:
 #   ./deploy.sh [name-or-domain]
 #
-# Defaults to "w3spayadmin.dot" if no name is given.
+# Resolution order: CLI arg > $VITE_DOTNS_PRODUCT_DOMAIN env > .env* files.
 #
 # Required env:
 #   - MNEMONIC or DOTNS_MNEMONIC      Deploying account (12- or 24-word phrase).
 #   - VITE_W3SPAY_REGISTRY_ADDRESS    Deployed W3SPayMerchantRegistry H160.
-#                                     May also live in `apps/w3spay-admin/.env*`;
+#                                     May also live in `.env*`;
 #                                     this script enforces it ahead of the build
 #                                     so deploys never ship a bundle that boots
 #                                     directly into the registry-not-configured
 #                                     gate.
 #   - VITE_NETWORK                    App chain key. Defaults to BULLETIN_ENV.
+#   - VITE_DOTNS_PRODUCT_DOMAIN  Target dot domain (e.g. "w3spayadmin.dot").
+#                                May also be supplied as the first CLI arg.
 #
 # Optional env:
-#   - DOTNS_GATEWAY_BASE      Final gateway host suffix (default: dot.li).
+#   - DOTNS_GATEWAY_BASE        Final gateway host suffix (default: dot.li).
 #   - BULLETIN_ENV            bulletin-deploy --env id (default: paseo-next-v2).
 #                             The app chain (VITE_NETWORK) MUST match this
 #                             deployment env so reads, writes, and DotNS all
 #                             target the same Paseo network.
 #
-# Mirror of `apps/w3spay/deploy.sh` so the two pilot surfaces deploy with
-# the same conventions and tooling expectations.
+# Follows the deploy conventions and tooling expectations shared across the
+# W3sPay pilot surfaces.
 
 set -euo pipefail
 
@@ -33,8 +35,43 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/dist"
 GATEWAY_BASE="${DOTNS_GATEWAY_BASE:-dot.li}"
 BULLETIN_ENV="${BULLETIN_ENV:-paseo-next-v2}"
-TARGET="${1:-w3spayadmin.dot}"
-MIN_BULLETIN_DEPLOY_VERSION="0.8.0"
+# Reads the last `KEY=` line from a single .env* file, trimmed and unquoted.
+# Returns 1 when the key is absent or empty.
+_read_envfile_key() {
+  local file="$1" key="$2" line value
+  line="$( (grep -E "^${key}=" "$file" || true) | tail -n 1)"
+  [[ -n "$line" ]] || return 1
+  value="${line#"${key}="}"
+  value="${value#"${value%%[![:space:]]*}"}"   # ltrim
+  value="${value%"${value##*[![:space:]]}"}"   # rtrim
+  if [[ "$value" == \"*\" ]]; then value="${value#\"}"; value="${value%\"}"; fi
+  if [[ "$value" == \'*\' ]]; then value="${value#\'}"; value="${value%\'}"; fi
+  value="$(printf '%s' "$value" | tr -s '[:space:]' ' ' | sed -E 's/^ //; s/ $//')"
+  [[ -n "$value" ]] && printf '%s' "$value" || return 1
+}
+
+TARGET="${1:-${VITE_DOTNS_PRODUCT_DOMAIN:-}}"
+if [[ -z "$TARGET" ]]; then
+  for _envfile in .env.production.local .env.production .env.local .env; do
+    [[ -f "$SCRIPT_DIR/$_envfile" ]] || continue
+    TARGET="$(_read_envfile_key "$SCRIPT_DIR/$_envfile" VITE_DOTNS_PRODUCT_DOMAIN || true)"
+    if [[ -n "$TARGET" ]]; then
+      echo "==> Using VITE_DOTNS_PRODUCT_DOMAIN from ${_envfile}."
+      break
+    fi
+  done
+fi
+MIN_BULLETIN_DEPLOY_VERSION="0.10.0"
+
+
+if [[ -z "$TARGET" ]]; then
+  echo "Error: no target domain provided."
+  echo ""
+  echo "Set it via the CLI arg, the VITE_DOTNS_PRODUCT_DOMAIN env var, or in a .env* file."
+  echo "  ./deploy.sh w3spayadmin.dot"
+  echo "  VITE_DOTNS_PRODUCT_DOMAIN=w3spayadmin.dot ./deploy.sh"
+  exit 1
+fi
 
 if [[ "$TARGET" != *.dot ]]; then
   TARGET="${TARGET}.dot"
@@ -64,14 +101,7 @@ version_gte() {
   (( current_patch >= minimum_patch ))
 }
 
-# Resolve VITE_W3SPAY_REGISTRY_ADDRESS from the shell env (highest
-# priority) or one of the .env files Vite will load at build time
-# (production-mode precedence: .env.production.local → .env.production →
-# .env.local → .env). Emits the resolved value on stdout, or returns 1
-# if nothing was found. Strips a single layer of surrounding double or
-# single quotes from a literal env-file value; does NOT support inline
-# `# comments` — `dotenv` treats those as part of the value too, so we
-# stay consistent with Vite's loader.
+
 resolve_registry_address() {
   if [[ -n "${VITE_W3SPAY_REGISTRY_ADDRESS:-}" ]]; then
     printf '%s' "$VITE_W3SPAY_REGISTRY_ADDRESS"
@@ -120,31 +150,7 @@ if ! version_gte "$BULLETIN_DEPLOY_VERSION" "$MIN_BULLETIN_DEPLOY_VERSION"; then
   exit 1
 fi
 
-# Resolve the deploying mnemonic. Sources in priority order:
-#   1. Shell env vars (MNEMONIC or DOTNS_MNEMONIC) — highest priority
-#   2. .env files in Vite precedence order:
-#        .env.production.local → .env.production → .env.local → .env
-#      Recognises both the MNEMONIC= and DOTNS_MNEMONIC= keys.
-# Both variable names are accepted at every layer; they MUST agree when
-# both are set in the same source. Store the mnemonic in .env.local
-# (gitignored) rather than .env to avoid accidental commits.
 
-# Helper: read and normalise a single key from an env file.
-# Prints the value on stdout; returns 1 when the key is absent or empty.
-# Strips one layer of surrounding quotes and collapses internal whitespace —
-# same rules as Vite's dotenv loader.
-_read_envfile_key() {
-  local file="$1" key="$2" line value
-  line="$( (grep -E "^${key}=" "$file" || true) | tail -n 1)"
-  [[ -n "$line" ]] || return 1
-  value="${line#"${key}="}"
-  value="${value#"${value%%[![:space:]]*}"}"   # ltrim
-  value="${value%"${value##*[![:space:]]}"}"   # rtrim
-  if [[ "$value" == \"*\" ]]; then value="${value#\"}"; value="${value%\"}"; fi
-  if [[ "$value" == \'*\' ]]; then value="${value#\'}"; value="${value%\'}"; fi
-  value="$(printf '%s' "$value" | tr -s '[:space:]' ' ' | sed -E 's/^ //; s/ $//')"
-  [[ -n "$value" ]] && printf '%s' "$value" || return 1
-}
 
 # 1. Normalise shell env vars and check for conflicts.
 _dotns_norm="$(printf '%s' "${DOTNS_MNEMONIC:-}" | tr -s '[:space:]' ' ' | sed -E 's/^ //; s/ $//')"
@@ -189,10 +195,6 @@ if [[ -z "$RAW_MNEMONIC" ]]; then
   exit 1
 fi
 
-# Word-count sanity check: BIP-39 mnemonics are 12 or 24 words. Anything else
-# is a paste accident — fail fast with a helpful message instead of letting
-# `@polkadot/keyring` throw the opaque "Unable to match provided value to a
-# secret URI" later.
 WORD_COUNT="$(printf '%s' "$RAW_MNEMONIC" | awk '{print NF}')"
 if [[ "$WORD_COUNT" != "12" && "$WORD_COUNT" != "24" ]]; then
   echo "Error: mnemonic has $WORD_COUNT words; expected 12 or 24."
@@ -204,9 +206,7 @@ fi
 
 export MNEMONIC="$RAW_MNEMONIC"
 
-# Resolve and enforce VITE_W3SPAY_REGISTRY_ADDRESS BEFORE the build runs.
-# A missing or malformed address would produce a bundle whose first paint
-# is the registry-not-configured gate — silently bad for a deploy.
+
 RESOLVED_REGISTRY_ADDRESS="$(resolve_registry_address || true)"
 if [[ -z "$RESOLVED_REGISTRY_ADDRESS" ]]; then
   echo "Error: VITE_W3SPAY_REGISTRY_ADDRESS is not set."
@@ -214,11 +214,11 @@ if [[ -z "$RESOLVED_REGISTRY_ADDRESS" ]]; then
   echo "Set it in the shell environment before running deploy:"
   echo "  export VITE_W3SPAY_REGISTRY_ADDRESS=0x…"
   echo ""
-  echo "Or add it to apps/w3spay-admin/.env.local (gitignored):"
+  echo "Or add it to .env.local (gitignored):"
   echo "  VITE_W3SPAY_REGISTRY_ADDRESS=0x…"
   echo ""
   echo "Use the deployed contract address from:"
-  echo "  apps/w3spay-admin/contracts/ignition/deployments/chain-420420417/deployed_addresses.json"
+  echo "  contracts/ignition/deployments/chain-420420417/deployed_addresses.json"
   echo ""
   echo "Skipping this variable would ship a bundle that lands directly on"
   echo "the registry-not-configured gate."
@@ -234,11 +234,8 @@ if ! [[ "$RESOLVED_REGISTRY_ADDRESS" =~ ^0x[0-9a-fA-F]{40}$ ]]; then
   exit 1
 fi
 
-# Re-export so the npm/vite child process sees the same value we
-# validated, regardless of which env source it came from. Vite would
-# load .env files itself, but exporting here keeps the build environment
-# unambiguous and matches what we just printed.
 export VITE_W3SPAY_REGISTRY_ADDRESS="$RESOLVED_REGISTRY_ADDRESS"
+export VITE_DOTNS_PRODUCT_DOMAIN="$TARGET"
 export VITE_NETWORK="${VITE_NETWORK:-$BULLETIN_ENV}"
 case "$VITE_NETWORK" in
   paseo|paseo-next-v2|previewnet) ;;
@@ -268,7 +265,7 @@ fi
 
 echo ""
 echo "==> Deploying ${TARGET} to Paseo Next v2 (BULLETIN_ENV=${BULLETIN_ENV})..."
-bulletin-deploy --publish --env "$BULLETIN_ENV" --mnemonic "$RAW_MNEMONIC" "$BUILD_DIR" "$TARGET"
+bulletin-deploy --env "$BULLETIN_ENV" --mnemonic "$RAW_MNEMONIC" "$BUILD_DIR" "$TARGET"
 
 NAME="${TARGET%.dot}"
 echo ""

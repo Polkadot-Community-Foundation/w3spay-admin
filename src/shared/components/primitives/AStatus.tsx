@@ -1,7 +1,5 @@
-/**
- * Status pill used in merchant rows and detail headers. Colors are
- * sourced from `STATUS_COLORS` per merchant lifecycle.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { STATUS_COLORS, type MerchantStatus } from "@shared/components/tokens.ts";
 

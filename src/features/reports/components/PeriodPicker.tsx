@@ -1,7 +1,5 @@
-/**
- * Three-segment window selector (24h / 7d / 30d) for the transactions
- * stream. The mapped IDs feed `useTransactionsStream` directly.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { StreamWindow } from "@features/reports/transaction-stream.ts";
 import { SegmentedChips } from "./SegmentedChips.tsx";

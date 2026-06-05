@@ -1,16 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 /**
- * TanStack Router route tree (code-based, hash history).
- *
  * Hash history is REQUIRED — the admin console runs inside the dotli
  * iframe, the Polkadot Desktop webview, and as an installed PWA, none of
- * which can drive path-based history reliably. `createHashHistory()` keeps
- * every route under `#/…` exactly as the old hand-rolled hash router did.
- *
- * Structure: `rootRoute` (chrome + providers) → `_authed` (gate overlay)
- * → the screen routes. `$param` segments are typed; param-detail screens
- * read them via `Route.useParams()`. Tab + tab-bar visibility ride on each
- * route's `staticData`. The native `router.history.back()` (wired in the
- * screens via `useCanGoBack`) replaces the old hardcoded Back targets.
+ * which can drive path-based history reliably.
  */
 
 import {
@@ -21,7 +15,7 @@ import {
   redirect,
 } from "@tanstack/react-router";
 
-import { queryClient } from "@shared/api/query-client.ts";
+import { queryClient } from "@shared/chain/query-client.ts";
 import { RootLayout } from "./layouts.tsx";
 import { AuthedLayout } from "./guards.tsx";
 import { AdminAccountCard } from "@features/session/pages/AdminAccess.tsx";
@@ -54,7 +48,6 @@ const indexRoute = createRoute({
   },
 });
 
-// ── Merchants ──────────────────────────────────────────────────────
 const merchantsRoute = createRoute({
   getParentRoute: () => authedRoute,
   path: "/merchants",
@@ -75,7 +68,6 @@ const merchantNewRoute = createRoute({
   staticData: { tab: "merchants", showTabs: false },
   component: function MerchantNewModeRoute() {
     const { mode } = merchantNewRoute.useParams();
-    // Unknown mode → fall back to the POS form (matches old parse).
     return <MerchantNew mode={mode === "pos" || mode === "t3rminal" ? mode : "pos"} />;
   },
 });
@@ -110,7 +102,6 @@ const merchantEditDestinationRoute = createRoute({
   },
 });
 
-// ── Items (single orchestrator screen, view from the route) ────────
 const itemsRoute = createRoute({
   getParentRoute: () => authedRoute,
   path: "/items",
@@ -165,7 +156,6 @@ const itemsItemEditRoute = createRoute({
   },
 });
 
-// ── Restaurants (single orchestrator screen) ───────────────────────
 const restaurantsRoute = createRoute({
   getParentRoute: () => authedRoute,
   path: "/restaurants",
@@ -197,7 +187,6 @@ const restaurantsEditRoute = createRoute({
   },
 });
 
-// ── Balances / Reports / Account ───────────────────────────────────
 const balancesRoute = createRoute({
   getParentRoute: () => authedRoute,
   path: "/balances",

@@ -1,9 +1,8 @@
-/**
- * "Load N more (M remaining)" footer for the windowed transaction
- * stream. Predictable manual pagination beats infinite scroll for an
- * admin console: progressive decrypts can prepend rows above the
- * viewport without yanking the operator's place.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
+// Manual pagination (not infinite scroll): progressive decrypts can prepend
+// rows above the viewport without yanking the operator's place.
 
 import { ASecondary } from "@shared/components/primitives.tsx";
 import { COLOR } from "@shared/components/tokens.ts";

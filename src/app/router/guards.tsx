@@ -1,22 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 /**
- * Access gate.
- *
- * `useGateVerdict` composes the host session + admin check + registry
- * read into a single verdict, shared by the root chrome (tab visibility)
- * and the pathless `_authed` route. `AuthedLayout` overlays
- * `<AdminAccess>` when the account isn't an admin / the host can't sign,
- * and `<RegistryShell>` while the registry loads — an in-place overlay,
- * NOT a redirect, so granting access lands on the underlying route.
- *
- * Session + registry state come from feature hooks (`useSession`,
- * `useMerchants`); there is no product context provider.
+ * `AuthedLayout` overlays `<AdminAccess>` / `<RegistryShell>` in place —
+ * NOT a redirect — so granting access lands on the underlying route.
  */
 
 import { Outlet } from "@tanstack/react-router";
 
-import { resolveAccessVariant } from "@features/session/api/resolve-access-variant.ts";
-import { useSession } from "@features/session/api/use-session.ts";
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
+import { resolveAccessVariant } from "@features/session/contracts/resolve-access-variant.ts";
+import { useSession } from "@features/session/contracts/use-session.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
 import { AdminAccess, type AccessVariant } from "@features/session/pages/AdminAccess.tsx";
 import { RegistryShell } from "@features/session/pages/RegistryShell.tsx";
 
@@ -26,11 +20,6 @@ export interface GateVerdict {
   readonly registryReady: boolean;
 }
 
-/**
- * Compose the host session + admin check + registry state into the gate
- * verdict — shared by the root chrome (tab visibility) and the `_authed`
- * gate.
- */
 export function useGateVerdict(): GateVerdict {
   const { adminAccount, readyAccount, hostChainSupport, chainSubmitGrant } = useSession();
   const { registry } = useMerchants();

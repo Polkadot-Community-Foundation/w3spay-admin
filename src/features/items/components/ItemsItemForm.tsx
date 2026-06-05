@@ -1,14 +1,5 @@
-/**
- * Items tab — add or edit an item inside a config.
- *
- * Single form covering both modes — `mode` toggles button copy and the
- * delete affordance. Price is the only numeric input — locked to
- * `inputMode=decimal` and keystroke-sanitised to digits and a single
- * separator so a misplaced letter never lands in form state.
- *
- * Categories were removed from the model: an item lives directly in
- * `config.items`. Nothing here orders items beyond append/in-place edit.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState } from "react";
 

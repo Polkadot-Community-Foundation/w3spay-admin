@@ -1,16 +1,5 @@
-/**
- * Top-level error boundary fallback.
- *
- * The admin console runs inside the host's mobile webview / dotli iframe
- * where there is no DevTools to inspect a white screen. A render error
- * that escapes every component-level boundary lands here (wired in
- * `main.tsx` via `<Sentry.ErrorBoundary>`), keeping the app chrome
- * (rail + frame) intact and offering a reload instead of a blank page.
- *
- * Sentry has already captured the error by the time this renders
- * (`@sentry/react`'s ErrorBoundary reports before showing the fallback),
- * so this component is purely the recovery surface.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { ARail, AFrame, APrimary } from "./primitives.tsx";
 import { COLOR, FONT } from "./tokens.ts";

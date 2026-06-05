@@ -1,17 +1,12 @@
-/**
- * Telemetry test surface for the admin app. Hidden behind
- * `?telemetry-test=1` so it never appears in a real admin flow.
- * Exercises every observable edge of the telemetry stack — see
- * `apps/w3spay/src/app/telemetry-test-screen.tsx` for the customer-side
- * mirror.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState } from "react";
 import * as Sentry from "@sentry/react";
 
-import { breadcrumb, captureError } from "@/shared/telemetry";
+import { breadcrumb, captureError } from "@/shared/lib/sentry";
 
-import { journeyTracker } from "@shared/utils/telemetry.ts";
+import { journeyTracker } from "@shared/lib/telemetry.ts";
 
 export function TelemetryTestScreen() {
   const [log, setLog] = useState<string[]>([]);
@@ -57,10 +52,9 @@ export function TelemetryTestScreen() {
 
   const testPrivacyRegression = () => {
     journeyTracker.start("chain-write", { "chain.write.op": "register-merchant" });
-    // `txHash` matches SENSITIVE_KEY_RE (via `tx_hash` segment) — the
+    // `txHash` matches SENSITIVE_KEY_RE (via the `tx_hash` segment) — the
     // guard refuses the write, logs a console.error, and drops the
-    // attribute. Journey continues; the privacy contract is
-    // observability metadata is dropped, never reaches Sentry.
+    // attribute. The journey continues; the value never reaches Sentry.
     journeyTracker.addAttributes("chain-write", {
       txHash: "0x1234567890abcdef1234567890abcdef12345678",
     });
@@ -99,10 +93,6 @@ export function TelemetryTestScreen() {
   );
 }
 
-/**
- * `true` when the URL query string contains `telemetry-test=1`. Cheap,
- * synchronous, safe to call from `App()`'s body.
- */
 export function isTelemetryTestRoute(): boolean {
   if (typeof window === "undefined") return false;
   const params = new URLSearchParams(window.location.search);

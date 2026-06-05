@@ -1,9 +1,5 @@
-/**
- * Pure-SVG lucide-style icons used by the admin console.
- *
- * Ported from `screens-shared.jsx::I`, trimmed to the names actually
- * referenced by the admin screens to avoid carrying dead pixels.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactElement } from "react";
 
@@ -38,10 +34,10 @@ const circle = (cx: number, cy: number, r: number, k?: string | number): ReactEl
 );
 
 const PATHS: Record<IconName, ReactElement[]> = {
-  check: [path("M20 6 9 17l-5-5")],
+  check: [path("M20 6 9 17l-5-5", 1)],
   x: [line(18, 6, 6, 18, 1), line(6, 6, 18, 18, 2)],
-  "chevron-left": [path("m15 18-6-6 6-6")],
-  "chevron-right": [path("m9 18 6-6-6-6")],
+  "chevron-left": [path("m15 18-6-6 6-6", 1)],
+  "chevron-right": [path("m9 18 6-6-6-6", 1)],
   scan: [
     path("M3 7V5a2 2 0 0 1 2-2h2", 1),
     path("M17 3h2a2 2 0 0 1 2 2v2", 2),

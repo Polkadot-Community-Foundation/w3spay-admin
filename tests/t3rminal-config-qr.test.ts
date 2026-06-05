@@ -1,15 +1,3 @@
-/**
- * QR payload + report-password contract.
- *
- * - Password derivation must be deterministic (same key + salt → same
- *   password) and salt-sensitive (different salts → different passwords).
- * - The payload must carry the item-config CID, not the full config body,
- *   so the QR fits and the T3rminal colleague's scanner only sees a tiny
- *   pointer.
- * - The encoded payload roundtrips through `JSON.parse` and stays under
- *   the static-QR byte guard.
- */
-
 import { describe, expect, it } from "vitest";
 
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
@@ -25,9 +13,9 @@ import {
   deriveReportPassword,
   encodeT3rminalConfigPayload,
   encodeT3rminalConfigPayloadV2,
-} from "@shared/utils/t3rminal-config-qr.ts";
+} from "@shared/lib/t3rminal-config-qr.ts";
 import type { ItemConfig } from "@features/items/items-model.ts";
-import { decodeT3rminalConfigQr } from "@/config-qr";
+import { decodeT3rminalConfigQr } from "@shared/lib/config-qr";
 
 const PUBLIC_KEY = new Uint8Array(32).fill(0xab);
 const SALT_A = new Uint8Array(16).fill(0x01);

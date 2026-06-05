@@ -1,8 +1,5 @@
-/**
- * Pure filter + sort over `AdminMerchant[]`, factored out of
- * `MerchantsList.tsx` so it's trivially testable in isolation and the
- * component body stays focused on layout.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
 import type { MerchantSort, StatusFilter } from "./types.ts";
@@ -35,7 +32,7 @@ export function filterAndSortMerchants({
         (m.derivedH160?.toLowerCase().includes(q) ?? false)
       );
     })
-    .slice() // detach from caller's array before sorting
+    .slice()
     .sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name);
       // recent → most recently updated first

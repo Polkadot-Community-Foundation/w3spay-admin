@@ -1,7 +1,5 @@
-/**
- * Top wordmark rail. Mark + W3sPay title + optional admin/pilot subtitle
- * (or a custom `right` slot). Sits above the tab bar.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

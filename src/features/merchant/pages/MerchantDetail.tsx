@@ -1,22 +1,10 @@
-/**
- * Merchants tab — single-merchant detail view backed by the W3SPay
- * registry. Renders only what the contract exposes: identity, lifecycle
- * status, payout destination, and timestamps. Payment aggregates are
- * not faked — there is no payment-aggregate source today.
- *
- * Pause / resume / revoke / reinstate trigger real `setMerchantStatus`
- * writes through `useMerchantWriteOps().writes`.
- *
- * Every identifier is copyable + truncated via `<CopyableRow>` so an
- * operator can pull any field into the clipboard with one tap.
- *
- * Sub-blocks live in `./merchant-detail/`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect, useState } from "react";
 
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
-import { useMerchantWriteOps } from "@features/merchant/api/use-merchant-write-ops.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
+import { useMerchantWriteOps } from "@features/merchant/contracts/use-merchant-write-ops.ts";
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import {
   formatIsoDateTime,
@@ -171,7 +159,6 @@ export function MerchantDetail({ m, onBack, pendingLookup }: MerchantDetailProps
         onSetStatus={(action, target) => void writes.setMerchantStatus(m, action, target)}
         onDelete={() =>
           void writes.deleteMerchant(m).then((ok) => {
-            // On success the row is gone — leave the now-stale detail view.
             if (ok) onBack();
           })
         }

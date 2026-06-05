@@ -1,17 +1,6 @@
-/**
- * Sticky-top banner shown while the admin console is running in demo
- * mode (synthetic data, no chain writes).
- *
- * Visible across every tab so a visitor never forgets they're in a
- * demo. Mounted at the top of `<AppShell>` once, above the `<AFrame>`
- * header — `AFrame` owns the inner scroll, so the banner does NOT
- * scroll with content.
- *
- * Styling lives inline (single-purpose component) and reuses the
- * amber/orange tokens already used for "paused" merchant pills, which
- * are recognisable across the rest of the UI without inventing a new
- * accent.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 import { COLOR } from "./tokens.ts";
 
 export function DemoModeBanner() {

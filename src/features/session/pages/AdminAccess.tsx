@@ -1,17 +1,5 @@
-/**
- * First-paint gate before the admin console renders.
- *
- * Three states:
- *   - disconnected (or outside host): show a sign-in / request access CTA.
- *   - connected but not (yet) an admin: show the copyable H160 grant
- *     address and a secondary SS58 display so the maintainer can grant
- *     access via `addAdmin(adminH160)` outside the app.
- *   - admin: the parent renders the real console instead of this screen.
- *
- * The 11 variant cards live in `./admin-access/AccessBody.tsx`; this
- * file keeps the public `AdminAccess` + `AdminAccountCard` exports
- * stable for `App.tsx` and `tests/admin-access.test.ts`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { AHead } from "@shared/components/primitives.tsx";
 import { AccessBody } from "@features/session/components/admin-access/AccessBody.tsx";

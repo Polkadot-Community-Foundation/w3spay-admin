@@ -2,7 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { envConfig } from "@shared/config.ts";
+import { envConfig } from "@/config";
 import { getAdminProductIdentifier } from "@shared/utils/get-admin-product-id.ts";
 import {
   InvalidAdminAddressError,
@@ -16,14 +16,14 @@ import {
   normalizeMerchantDestinationInput,
   publicKeyToSs58,
   deriveH160,
-} from "@shared/utils/address.ts";
+} from "@shared/lib/address.ts";
 import { shortenAddress } from "@shared/utils/format.ts";
 import {
   buildAdminGrantIdentity,
   selectAdminCopyTarget,
 } from "@features/session/account.ts";
 import { withTimeout } from "@shared/utils/with-timeout.ts";
-import { detectHostEnvironment } from "@shared/api/host-connection.ts";
+import { detectHostEnvironment } from "@shared/chain/host-connection.ts";
 import { AdminAccess, AdminAccountCard } from "@features/session/pages/AdminAccess.tsx";
 
 const PUBLIC_KEY_HEX = "d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d";
@@ -60,7 +60,7 @@ describe("envConfig.host.productDotNs identifier", () => {
     // Ensures the product account call always uses the stable .dot identifier
     // regardless of the iframe URL dotli happens to use (which can be
     // "w3spayadmin.dot.li" or an IPFS gateway URL).
-    expect(envConfig.host.productDotNs).toBe("w3spayadmin.dot");
+    expect(envConfig.host.productDotNs).toBe(import.meta.env.VITE_DOTNS_PRODUCT_DOMAIN);
   });
 });
 
@@ -222,7 +222,7 @@ describe("buildAdminGrantIdentity / selectAdminCopyTarget", () => {
     );
     expect(identity.ss58Address).toBe("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
     expect(identity.accountId32).toBe(`0x${PUBLIC_KEY_HEX}`);
-    expect(identity.productIdentifier).toBe("w3spayadmin.dot");
+    expect(identity.productIdentifier).toBe(envConfig.host.productDotNs);
     expect(identity.derivationIndex).toBe(0);
     expect(identity.adminH160).toBe("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd");
     expect(identity.copyTarget).toBe(identity.adminH160);
@@ -231,7 +231,7 @@ describe("buildAdminGrantIdentity / selectAdminCopyTarget", () => {
 });
 
 describe("AdminAccountCard", () => {
-  it("renders the resolved H160 and SS58 account addresses with copy affordances", () => {
+  it("renders the account address with a copy affordance and drops the SS58 jargon", () => {
     const identity = buildAdminGrantIdentity(
       publicKeyBytes(),
       "0xABcDefAbcdefAbCdEfAbCdEfAbCdEfAbCdEfAbCd",
@@ -244,14 +244,17 @@ describe("AdminAccountCard", () => {
     );
 
     expect(html).toContain(identity.adminH160);
-    expect(html).toContain(identity.ss58Address);
-    expect(html).toContain("Copy H160");
-    expect(html).toContain("Copy SS58");
+    expect(html).toContain("Copy address");
+    // The SS58 encoding of the same account is no longer surfaced — the
+    // de-jargoned card shows only the address the maintainer needs.
+    expect(html).not.toContain(identity.ss58Address);
+    expect(html).not.toContain("SS58");
+    expect(html).not.toContain("H160");
   });
 });
 
 describe("AdminAccess", () => {
-  it("keeps the resolved account visible while the registry admin check is pending", () => {
+  it("keeps the account address visible while the access check is pending", () => {
     const identity = buildAdminGrantIdentity(
       publicKeyBytes(),
       "0xABcDefAbcdefAbCdEfAbCdEfAbCdEfAbCdEfAbCd",
@@ -268,9 +271,9 @@ describe("AdminAccess", () => {
       }),
     );
 
-    expect(html).toContain("Checking registry access");
+    expect(html).toContain("Checking access");
     expect(html).toContain(identity.adminH160);
-    expect(html).toContain(identity.ss58Address);
+    expect(html).not.toContain(identity.ss58Address);
     expect(html).toContain("Checking…");
   });
 
@@ -286,8 +289,8 @@ describe("AdminAccess", () => {
       }),
     );
 
-    expect(html).toContain("Resolving your product account");
-    expect(html).not.toContain("Request admin access");
+    expect(html).toContain("Signing you in");
+    expect(html).not.toContain("Request access");
   });
 });
 

@@ -1,35 +1,15 @@
-/**
- * Pure helpers for the Reports → Transactions stream.
- *
- * The Reports surface fans out across `(shopKey, date)` pairs from
- * `T3rminalBulletinIndex`, decrypts each day's report, and renders a
- * single chronological transaction list windowed to 24h / 7d / 30d.
- * Everything network / React / cache lives elsewhere — this module is
- * the deterministic, side-effect-free core that can be unit-tested
- * without mounting React.
- *
- * Window semantics: rolling-N from `now`. Day-level filtering keeps the
- * boundary day so partial-day transactions aren't dropped at the index
- * step; transaction-level filtering (`timestampMs >= sinceMs`) trims
- * the remainder during flattening.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type {
   DailyReport,
   DailyReportTransaction,
 } from "./daily-report.ts";
 
-// ── Window ─────────────────────────────────────────────────────────
-
-/** Stream window selector. */
 export type StreamWindow = "24h" | "7d" | "30d";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/**
- * Duration of a window in milliseconds. Exposed so the view can label
- * "Last 7 days" / "Last 30 days" without repeating the conversion.
- */
 export function windowDurationMs(window: StreamWindow): number {
   switch (window) {
     case "24h":
@@ -71,8 +51,6 @@ function isoDayUtc(ms: number): string {
   return new Date(ms).toISOString().slice(0, 10);
 }
 
-// ── Stream shape ────────────────────────────────────────────────────
-
 /**
  * Terminal identity carried alongside every stream entry so the
  * aggregate view can label rows with the originating terminal.
@@ -96,7 +74,6 @@ export interface StreamTransaction {
   readonly timestampMs: number;
 }
 
-/** Input to {@link flattenReports}. */
 export interface ReportBucket {
   readonly terminal: TerminalRef;
   readonly date: string;
@@ -133,9 +110,6 @@ export function flattenReports(
   return out;
 }
 
-// ── Summary ────────────────────────────────────────────────────────
-
-/** Per-asset Finished totals returned from {@link summarize}. */
 export interface StreamSummaryByAsset {
   /**
    * Sum of `Number(tx.amountFormatted)` across Finished rows for this
@@ -150,7 +124,6 @@ export interface StreamSummaryByAsset {
   readonly count: number;
 }
 
-/** Result of {@link summarize}. */
 export interface StreamSummary {
   /** Total tx count in the stream — Finished AND Refunded. */
   readonly count: number;
@@ -196,7 +169,7 @@ function parseAmountFormatted(raw: string): number | null {
   const n = Number(raw);
   return Number.isFinite(n) ? n : null;
 }
-import type { ReportIndexEntry } from "@features/reports/api/bulletin-index-read.ts";
+import type { ReportIndexEntry } from "@features/reports/contracts/bulletin-index-read.ts";
 
 export interface TransactionsStreamTerminal {
   readonly terminal: TerminalRef;

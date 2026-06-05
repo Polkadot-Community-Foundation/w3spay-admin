@@ -15,7 +15,12 @@ import {
   type Abi,
 } from "viem";
 
-import { resolveNetwork, type NetworkConfig } from "../../../src/sdk/host/index.ts";
+import {
+  resolveNetwork,
+  SUPPORTED_NETWORKS,
+  type NetworkConfig,
+} from "../../../src/shared/chain/host/networks";
+import { parseEnvSelector } from "./argv";
 
 export const CONTRACTS_ROOT = resolve(__dirname, "..", "..");
 export const APP_ROOT = resolve(CONTRACTS_ROOT, "..");
@@ -81,11 +86,7 @@ export function loadDefaultEnv(): void {
 }
 
 export function parseEnvFlag(argv: string[]): string | undefined {
-  const index = argv.indexOf("--env");
-  if (index === -1) return undefined;
-  const value = argv[index + 1];
-  if (!value) throw new Error("--env requires a value (e.g. paseo-next-v2 | previewnet)");
-  return value;
+  return parseEnvSelector(argv, SUPPORTED_NETWORKS);
 }
 
 export function resolveScriptNetwork(argv = process.argv): NetworkConfig {

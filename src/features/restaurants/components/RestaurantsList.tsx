@@ -1,10 +1,5 @@
-/**
- * Restaurants tab — list of stored restaurant profiles.
- *
- * Read-only. The "New restaurant" CTA lives in the page footer wired
- * by the tab orchestrator so it stays sticky on small screens. Each
- * row drills into a `RestaurantForm` edit screen.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import {
   ACard,

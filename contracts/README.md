@@ -6,17 +6,15 @@ identity to a canonical `bytes32 destinationAccountId`, optional
 `displayName`, lifecycle `status`, and `addedAt` / `updatedAt` timestamps.
 Admins manage entries through the Hardhat CLI scripts in this directory.
 
-- Chain: Paseo Next V2 Asset Hub by default (`paseo-next-v2` in `../src/host/networks.ts`), pallet-revive.
+- Chain: Paseo Next V2 Asset Hub by default (`paseo-next-v2`), pallet-revive.
 - Contract source: `src/W3SPayMerchantRegistry.sol`.
 - Interface: `src/interfaces/IW3SPayMerchantRegistry.sol`.
 - Tests: `test/W3SPayMerchantRegistry.test.ts` (in-memory hardhat network — no Paseo connection needed).
 - Deployment: `scripts/deploy-registry.ts` (`Revive.instantiate_with_code` through PAPI).
 
-This package has its own `node_modules/` and `package-lock.json`; it is
-**not** part of the root npm workspace glob. Bootstrap separately:
+This package has its own `node_modules/` and `package-lock.json`. Bootstrap it:
 
 ```sh
-cd apps/w3spay-admin/contracts
 npm install
 ```
 
@@ -61,7 +59,6 @@ target Asset Hub and will become the contract `owner` + first admin via its
 pallet-revive H160 address.
 
 ```sh
-cd apps/w3spay-admin/contracts
 cp .env.example .env
 # edit DEPLOYER_SEED="twelve or twenty-four word mnemonic ..."
 ```
@@ -85,32 +82,30 @@ npm run deploy
 npm run deploy:paseo-next-v2
 ```
 
-The deployer uses the same model as `w3s-conference-app`: compile the
-Hardhat artifact, derive an sr25519 signer from `DEPLOYER_SEED`, ensure the
-Substrate account is mapped, dry-run `ReviveApi.instantiate`, then submit
-`pallet_revive::instantiate_with_code`.
+The deployer compiles the Hardhat artifact, derives an sr25519 signer from
+`DEPLOYER_SEED`, ensures the Substrate account is mapped, dry-runs
+`ReviveApi.instantiate`, then submits `pallet_revive::instantiate_with_code`.
 
 The script writes:
 
 ```sh
-contracts/deployments/<network>/deployed_addresses.json
-contracts/deployments/<network>/deployment.json
-../.env.local              # apps/w3spay-admin/.env.local
-../../w3spay/.env.local    # apps/w3spay/.env.local (sibling consumer app)
+deployments/<network>/deployed_addresses.json
+deployments/<network>/deployment.json
+../.env.local              # the admin app
 ```
 
-Both `.env.local` files receive:
+Both the admin app and, when a w3spay cashier app is checked out alongside
+it, that app's `.env.local` receive:
 
 ```sh
 VITE_NETWORK=<network>
 VITE_W3SPAY_REGISTRY_ADDRESS=0x...
 ```
 
-Writing both keeps the admin and the consumer (`apps/w3spay`) on the
-same on-chain registry without a manual copy step. When the w3spay app
-isn't present at this checkout the deploy script logs a `Skipped:`
-warning instead of failing, so a stripped tree (e.g. CI that only
-pulled the admin) still deploys cleanly.
+This keeps admin and consumer on the same on-chain registry without a manual
+copy step. If the cashier app isn't present, the script logs a `Skipped:`
+warning instead of failing.
+
 Contract storage layout changed when lifecycle status and AccountId32
 merchant destinations were added. Existing deployments are not upgradeable
 in place: deploy a fresh registry and update every product environment
@@ -126,18 +121,21 @@ deployed address is never baked into source.
 All registry scripts are PAPI-first and use the same `NETWORK` / `--env`
 selection model as the deployer. They load `contracts/.env` and
 `../.env.local`, so a fresh deployment's `VITE_W3SPAY_REGISTRY_ADDRESS` is
-picked up automatically. Script-specific inputs are passed through
-`W3SPAY_*` environment variables or equivalent CLI flags. The convention is
-`W3SPAY_<FLAG_NAME>` with dashes upper-cased to underscores
-(e.g. `--merchant-id` → `W3SPAY_MERCHANT_ID`).
+picked up automatically. Prefer either `NETWORK=previewnet npm run ...` or
+`npm run ... -- --env previewnet` when selecting a network through npm. The
+scripts also tolerate npm's warning-producing `npm run ... --env previewnet`
+form by treating the forwarded positional network key as the selected network.
+Script-specific inputs are passed through `W3SPAY_*` environment variables or
+equivalent CLI flags. The convention is `W3SPAY_<FLAG_NAME>` with dashes
+upper-cased to underscores (e.g. `--merchant-id` → `W3SPAY_MERCHANT_ID`).
 
 ### Register a new merchant terminal
 
 ```sh
-export W3SPAY_MERCHANT_ID=funkhaus
-export W3SPAY_TERMINAL_ID=bar-east-01
+export W3SPAY_MERCHANT_ID=demo-merchant
+export W3SPAY_TERMINAL_ID=register-01
 export W3SPAY_DESTINATION=0x0000000000000000000000001234567890abcdef1234567890abcdef12345678
-export W3SPAY_DISPLAY_NAME="Bar East (Funkhaus)"   # optional
+export W3SPAY_DISPLAY_NAME="Demo Store"   # optional
 npm run registry:register
 ```
 
@@ -159,10 +157,10 @@ Reverts on:
 ### Update an existing merchant's destination or displayName
 
 ```sh
-export W3SPAY_MERCHANT_ID=funkhaus
-export W3SPAY_TERMINAL_ID=bar-east-01
+export W3SPAY_MERCHANT_ID=demo-merchant
+export W3SPAY_TERMINAL_ID=register-01
 export W3SPAY_DESTINATION=0x000000000000000000000000abcdefabcdefabcdefabcdefabcdefabcdefabcd
-export W3SPAY_DISPLAY_NAME="Bar East v2"           # optional
+export W3SPAY_DISPLAY_NAME="Demo Store v2"           # optional
 npm run registry:update
 ```
 
@@ -173,8 +171,8 @@ terminalId)` pair was never registered.
 ### Pause, revoke, or reactivate a merchant
 
 ```sh
-export W3SPAY_MERCHANT_ID=funkhaus
-export W3SPAY_TERMINAL_ID=bar-east-01
+export W3SPAY_MERCHANT_ID=demo-merchant
+export W3SPAY_TERMINAL_ID=register-01
 export W3SPAY_STATUS=paused                        # active | paused | revoked
 npm run registry:set-status
 ```
@@ -186,8 +184,8 @@ directory. `active` reactivates a paused or revoked terminal.
 ### Hard-delete a merchant entry
 
 ```sh
-export W3SPAY_MERCHANT_ID=funkhaus
-export W3SPAY_TERMINAL_ID=bar-east-01
+export W3SPAY_MERCHANT_ID=demo-merchant
+export W3SPAY_TERMINAL_ID=register-01
 npm run registry:remove
 ```
 
@@ -200,6 +198,13 @@ normal admin flows should use `W3SPAY_STATUS=revoked` instead.
 ```sh
 export W3SPAY_ADMIN=0xabc...
 npm run registry:add-admin
+```
+
+To target a non-default network, set `NETWORK` or pass `--env` through npm:
+
+```sh
+NETWORK=previewnet npm run registry:add-admin
+npm run registry:add-admin -- --env previewnet
 ```
 
 Idempotent — if the address is already admin, the script returns early
@@ -221,12 +226,12 @@ Dumps version, count, and every row in chain enumeration order, including
 1. **Register the destination on chain.**
 
    ```sh
-   cd apps/w3spay-admin/contracts
+   cd contracts
    export W3SPAY_REGISTRY_ADDRESS=0x...
    export W3SPAY_MERCHANT_ID=demo-bakery
    export W3SPAY_TERMINAL_ID=register-01
    export W3SPAY_DESTINATION=0x0000000000000000000000001234567890abcdef1234567890abcdef12345678
-   export W3SPAY_DISPLAY_NAME="APL Demo Bakery (Berlin)"
+   export W3SPAY_DISPLAY_NAME="Demo Bakery"
    npm run registry:register
    ```
 

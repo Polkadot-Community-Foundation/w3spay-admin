@@ -1,7 +1,5 @@
-/**
- * Small uppercase-tracked eyebrow label used inside cards and above tight
- * inline sections.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

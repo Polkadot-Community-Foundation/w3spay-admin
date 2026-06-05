@@ -1,7 +1,5 @@
-/**
- * W3sPay wordmark — a filled ring with a smaller filled dot.
- * Ported from `screens-shared.jsx::Mark`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 export interface MarkProps {
   size?: number;

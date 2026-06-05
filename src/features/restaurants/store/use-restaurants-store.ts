@@ -1,19 +1,5 @@
-/**
- * Local restaurant records as a Zustand store (host-KV / localStorage
- * backed). Replaces the `useRestaurants` hook.
- *
- * Persistence is NOT zustand's `persist` middleware: the host KV is
- * async, while the new-restaurant flow navigates away in the same commit
- * it writes — a deferred/async persist would be torn down before it
- * fired. So this store keeps the previous semantics exactly: an explicit
- * async `hydrate()` (read once, incl. the one-time `merchant-profiles/v1`
- * legacy migration) plus synchronous write-through on every mutation
- * (`BrowserKvStore.setJSON` commits to `localStorage` before yielding).
- *
- * The KV handle + hydrate guard are module singletons. `useRestaurants()`
- * is the consumer hook: it kicks `hydrate()` on mount and returns the
- * `UseRestaurantsResult` contract.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect } from "react";
 import { create } from "zustand";
@@ -30,17 +16,13 @@ import {
 } from "@features/restaurants/restaurants.ts";
 
 export interface RestaurantsState extends UseRestaurantsResult {
-  /** Read KV once (with legacy migration). Idempotent across calls. */
+  /** Idempotent across calls. */
   hydrate(): Promise<void>;
 }
 
 let hydrating: Promise<void> | null = null;
 
 function persist(next: ReadonlyMap<string, Restaurant>): void {
-  // Synchronous-enough: BrowserKvStore.setJSON runs localStorage.setItem
-  // before yielding its (ignored) promise, so the write lands before the
-  // navigate-away teardown. Host KV is genuinely async but the admin
-  // never reads it back within the same commit.
   const store = cachedAdminKvStore();
   if (store == null) return;
   void store.setJSON(RESTAURANTS_KEY, encodeRestaurantsPayload(next));
@@ -63,9 +45,6 @@ export const useRestaurantsStore = create<RestaurantsState>((set, get) => ({
         const raw = await store.getJSON<unknown>(RESTAURANTS_KEY);
         const decoded = decodeRestaurantsPayload(raw);
         if (decoded.size === 0) {
-          // First boot after the rename — fold any legacy
-          // `merchant-profiles/v1` entries forward and persist them
-          // under the new key so later boots skip the legacy read.
           let legacyMap: ReadonlyMap<string, Restaurant> = new Map();
           try {
             const legacy = await store.getJSON<unknown>(LEGACY_MERCHANT_PROFILES_KEY);
@@ -108,11 +87,6 @@ export const useRestaurantsStore = create<RestaurantsState>((set, get) => ({
   },
 }));
 
-/**
- * Consumer hook: triggers hydration on mount and returns the
- * `UseRestaurantsResult` slice. Subscribes to the whole store — callers
- * (the Restaurants screen, ConfigureT3rminal) use every field.
- */
 export function useRestaurants(): UseRestaurantsResult {
   const hydrate = useRestaurantsStore((s) => s.hydrate);
   useEffect(() => {

@@ -1,8 +1,5 @@
-/**
- * Form input family: AField (labeled wrapper with hint/error), AInput
- * (single-line), ATextarea (multi-line). All share the surface + border
- * styling so they stack visually in long forms.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

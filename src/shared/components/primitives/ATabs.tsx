@@ -1,7 +1,5 @@
-/**
- * Underline tab bar generic over the tab id union. The active tab is
- * tracked via `value`; switching is up to the parent.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "@shared/components/tokens.ts";
 

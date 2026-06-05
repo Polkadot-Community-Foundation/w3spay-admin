@@ -1,11 +1,5 @@
-/**
- * Items tab — list of catalogue configs. Each row drills into a
- * `ItemsDetail`. Counters reflect the live shape: number of configs and
- * total items across all configs.
- *
- * Read-only. The "New config" CTA lives in the page footer wired by the
- * tab orchestrator so it stays sticky on small screens.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import {
   ACard,
@@ -163,8 +157,7 @@ function ConfigRow({ config, onClick }: { config: ItemConfig; onClick: () => voi
   );
 }
 
-/** Placeholder shown while the published registry is still fetching.
- * Mirrors the ItemsList layout shape so there's no jump on load. */
+/** Skeleton placeholder; mirrors the ItemsList layout so there's no jump on load. */
 export function ItemsListSkeleton() {
   const skel = (w: number | string, h: number, r = 6): React.CSSProperties => ({
     width: w,
@@ -177,18 +170,15 @@ export function ItemsListSkeleton() {
 
   return (
     <>
-      {/* Header */}
       <div style={{ ...skel(52, 10, 4), marginBottom: 10 }} />
       <div style={{ ...skel(100, 28, 6), marginBottom: 8 }} />
       <div style={{ ...skel("72%", 13, 4), marginBottom: 18 }} />
 
-      {/* Counter pills */}
       <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
         <div style={skel(72, 28, 999)} />
         <div style={skel(72, 28, 999)} />
       </div>
 
-      {/* Config card rows */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {([120, 88, 104] as const).map((titleW, i) => (
           <div
@@ -212,7 +202,6 @@ export function ItemsListSkeleton() {
         ))}
       </div>
 
-      {/* Button placeholders */}
       <div style={{ height: 14 }} />
       <div style={{ ...skel("100%", 36, 10) }} />
       <div style={{ height: 10 }} />

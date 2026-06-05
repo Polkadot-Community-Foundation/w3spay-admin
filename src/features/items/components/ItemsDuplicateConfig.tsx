@@ -1,11 +1,5 @@
-/**
- * Items tab — duplicate-an-existing-config screen.
- *
- * Renders a source-summary card (item count + sample names) and asks
- * the admin to pick a new name + slug. The deep-copy happens in the
- * pure mutation so this screen stays presentational and the original
- * is never touched until the new write succeeds.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { Icon } from "@shared/components/Icon.tsx";
 import {

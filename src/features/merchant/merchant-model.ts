@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 import { keccak256, encodePacked } from "viem";
 
 import {
@@ -5,28 +8,17 @@ import {
   accountId32ToH160IfLeftPadded,
   type AccountId32Hex,
   type H160Hex,
-} from "@shared/utils/address.ts";
+} from "@shared/lib/address.ts";
 
 export type MerchantLifecycle = "active" | "paused" | "revoked";
 
-/**
- * Whether a registered merchant entry is a regular POS terminal (manual
- * destination + free-form terminalId) or a T3rminal device (destination
- * doubles as the device identity; terminalId is derived).
- *
- * Stored implicitly: on-chain rows only have `terminalId`. T3rminal rows
- * are recognised by the `T3RMINAL_TERMINAL_ID_PREFIX` prefix on their
- * `terminalId`. `merchantKindFromTerminalId` is the single decoder.
- */
+/** POS terminal vs T3rminal device — derived from the terminalId prefix, not stored on-chain. */
 export type MerchantKind = "pos" | "t3rminal";
 
 /**
- * Prefix used to tag a T3rminal device's `terminalId` in the registry.
- * Pattern: `${T3RMINAL_TERMINAL_ID_PREFIX}{accountId32 hex without 0x}`.
- *
- * The contract enforces uniqueness on `(merchantId, terminalId)` via
- * `keccak256(merchantId || "|" || terminalId)`. Embedding the destination
- * in the terminalId gives us a deterministic, collision-free id per device.
+ * Tags a T3rminal device's `terminalId`: `${T3RMINAL_TERMINAL_ID_PREFIX}{accountId32 hex without 0x}`.
+ * Embedding the destination yields a deterministic, collision-free id under the
+ * contract's `(merchantId, terminalId)` uniqueness key.
  */
 export const T3RMINAL_TERMINAL_ID_PREFIX = "t3r-";
 
@@ -34,29 +26,13 @@ export function merchantKindFromTerminalId(terminalId: string): MerchantKind {
   return terminalId.startsWith(T3RMINAL_TERMINAL_ID_PREFIX) ? "t3rminal" : "pos";
 }
 
-/**
- * Derive the canonical `terminalId` for a T3rminal device whose payout
- * destination is `accountId32`. The 64-char hex tail is deterministic and
- * collision-free, so admins never have to invent a unique terminalId per
- * device.
- */
 export function t3rminalTerminalIdForDestination(accountId32: AccountId32Hex): string {
   return `${T3RMINAL_TERMINAL_ID_PREFIX}${accountId32.slice(2).toLowerCase()}`;
 }
 
 /**
- * Off-chain mirror of the contract's `_terminalKey` derivation —
- * `keccak256(abi.encodePacked(merchantId, "|", terminalId))`. Same
- * encoding the Solidity registry uses to key `entries[bytes32 => ...]`
- * (see `contracts/src/W3SPayMerchantRegistry.sol::_terminalKey`).
- *
- * Used by the write-side hooks so we can return the `merchant.key` the
- * registry just minted — without an extra read round-trip — and let the
- * UI navigate to its detail screen immediately after the tx finalizes.
- *
- * Always returns a lowercase 0x-prefixed 32-byte hex string to match
- * viem's `bytes32` decoder, which is what `list-merchant-entries`
- * surfaces on the read side. Comparing both sides without
+ * Off-chain mirror of the contract's `_terminalKey` — `keccak256(merchantId || "|" || terminalId)`.
+ * Always lowercase 0x-prefixed; comparing against the read side without
  * lowercase-normalisation will silently miss matches.
  */
 export function computeTerminalKey(merchantId: string, terminalId: string): `0x${string}` {
@@ -138,8 +114,6 @@ function derivedH160From(value: string): H160Hex | null {
   }
 }
 
-// ── Format helpers ────────────────────────────────────────────────
-
 export const fmtCount = (n: number): string => n.toLocaleString("en-US");
 
 export function shortAddr(value: string | null | undefined, start = 8, end = 6): string {
@@ -148,18 +122,7 @@ export function shortAddr(value: string | null | undefined, start = 8, end = 6):
   return `${value.slice(0, start)}…${value.slice(-end)}`;
 }
 
-/**
- * Truncate a T3rminal `terminalId` to a readable short form.
- *
- * A T3rminal id is `t3r-<64 hex chars>` — too wide for a compact row.
- * The prefix is kept intact so the entry is identifiable at a glance;
- * only the hex body is shortened:
- *
- *   `t3r-f3ffe…3f3f`
- *
- * Falls back to `shortAddr`-style truncation for non-`t3r-` ids so POS
- * terminals and future id schemes degrade gracefully.
- */
+/** Truncate a `t3r-` terminalId to `t3r-f3ffe…3f3f`; falls back to `shortAddr` for other ids. */
 export function shortTerminalId(terminalId: string, head = 5, tail = 4): string {
   if (terminalId.startsWith(T3RMINAL_TERMINAL_ID_PREFIX)) {
     const body = terminalId.slice(T3RMINAL_TERMINAL_ID_PREFIX.length);
@@ -169,11 +132,6 @@ export function shortTerminalId(terminalId: string, head = 5, tail = 4): string 
   return shortAddr(terminalId);
 }
 
-/**
- * Default `displayName` for a freshly-registered T3rminal whose admin left
- * the display-name field blank. Keeps the directory listing meaningful when
- * the admin only entered an address.
- */
 export function defaultT3rminalDisplayName(accountId32: AccountId32Hex): string {
   return `T3rminal · ${shortAddr(accountId32, 8, 6)}`;
 }

@@ -2,14 +2,7 @@ import { ethers } from "ethers";
 
 const ACCOUNT_ID32_RE = /^0x[0-9a-fA-F]{64}$/;
 
-/**
- * Normalize a merchant payout destination to the contract's canonical
- * AccountId32 bytes32 value.
- *
- * Operators should prefer pasting a 32-byte AccountId. For legacy revive/H160
- * destinations, the helper preserves the existing convention:
- * `0x00 × 12 ‖ H160`.
- */
+/** Legacy H160 destinations are left-padded to AccountId32 as `0x00 × 12 ‖ H160`. */
 export function parseDestinationAccountId(raw: string): string {
   const trimmed = raw.trim();
   if (ACCOUNT_ID32_RE.test(trimmed)) {

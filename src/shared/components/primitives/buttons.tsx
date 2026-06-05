@@ -1,7 +1,5 @@
-/**
- * Editorial button family: APrimary (filled pill), ASecondary (outline
- * pill), AGhost (icon-only or compact text). Sized for mobile touch.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 
@@ -90,7 +88,6 @@ export interface AGhostProps {
   children: ReactNode;
   onClick?: () => void;
   color?: string;
-  /** Native tooltip shown on hover — used to surface full values for truncated labels. */
   title?: string;
 }
 

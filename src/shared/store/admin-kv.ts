@@ -1,15 +1,7 @@
-/**
- * Single admin-scoped KV store, shared by the local-persisted Zustand
- * stores (restaurants, t3rminal-assignments, item-config drafts).
- *
- * `createTerminalStore` is async (host KV) and races on early mobile
- * boot, so we cache the resolved handle once. `getAdminKvStore()` is the
- * async accessor (await it in `hydrate()`); `cachedAdminKvStore()` is the
- * synchronous read for write-through mutations — by the time a mutation
- * fires the store has hydrated, so the cached handle is present.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
-import { createTerminalStore, type KvStore } from "@shared/utils/host-environment.ts";
+import { createTerminalStore, type KvStore } from "@shared/chain/host-environment.ts";
 
 const KV_PREFIX = "w3spay-admin";
 
@@ -31,12 +23,10 @@ export function getAdminKvStore(): Promise<KvStore | null> {
   return creating;
 }
 
-/** Synchronous read of the cached handle (null before first hydrate). */
 export function cachedAdminKvStore(): KvStore | null {
   return cached;
 }
 
-/** Test/HMR only — drop the cached store so the next call rebuilds. */
 export function resetAdminKvStore(): void {
   cached = null;
   creating = null;

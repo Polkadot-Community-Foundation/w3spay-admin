@@ -1,7 +1,5 @@
-/**
- * Page-level title block. DM Serif headline with optional small eyebrow
- * above it (kicker line).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

@@ -1,28 +1,16 @@
-/**
- * Decrypted-report detail panel.
- *
- * Runs `useDecryptedReport(cid, reportPassword, gatewayBase)` and
- * renders one of: loading, ready (full daily-report view), legacy-v1
- * notice, corrupt-payload notice, decrypt-error, parse-error, or
- * fetch-error. Sits inline above the date list while the user has a
- * row selected.
- *
- * The actual transaction list rendering mirrors
- * `apps/t3rminal-v1/app/on-chain-reports/page.tsx` so a user moving
- * between the two surfaces sees the same shape — same eyebrow / summary
- * tile / per-transaction card structure, just in admin styling.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
-import { envConfig } from "@shared/config.ts";
-import { useDecryptedReport } from "@features/reports/api/report-queries.ts";
-import { resolveNetwork } from "@shared/api/host";
-import { gatewayUrlForCid } from "@features/items/api/item-config-storage.ts";
+import { envConfig } from "@/config";
+import { useDecryptedReport } from "@features/reports/contracts/report-queries.ts";
+import { resolveNetwork } from "@shared/chain/host";
+import { gatewayUrlForCid } from "@features/items/contracts/item-config-storage.ts";
 import { shortAddr } from "@features/merchant/merchant-model.ts";
 import type {
   DailyReport,
   DailyReportTransaction,
 } from "@features/reports/daily-report.ts";
-import type { ReportIndexEntry } from "@features/reports/api/bulletin-index-read.ts";
+import type { ReportIndexEntry } from "@features/reports/contracts/bulletin-index-read.ts";
 import type { T3rminalAssignmentV1 } from "@shared/store/t3rminal-assignments.ts";
 import { Icon } from "@shared/components/Icon.tsx";
 import {
@@ -156,8 +144,6 @@ export function ReportDetailPanel({ entry, assignment, onClose }: ReportDetailPa
     </ACard>
   );
 }
-
-// ── Sub-blocks ─────────────────────────────────────────────────────
 
 function LoadingStatus() {
   return (
@@ -353,8 +339,6 @@ function TransactionCard({ tx }: { tx: DailyReportTransaction }) {
     </div>
   );
 }
-
-// ── Helpers ────────────────────────────────────────────────────────
 
 function downloadReportJson(date: string, report: DailyReport): void {
   try {

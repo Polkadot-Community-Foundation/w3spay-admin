@@ -1,7 +1,3 @@
-/**
- * Register a new merchant terminal in the W3SPay registry via pallet-revive.
- */
-
 import { parseArgv, readArg, requireArg } from "./lib/argv";
 import { formatStatus, parseDestinationAccountId } from "./lib/destination";
 import {

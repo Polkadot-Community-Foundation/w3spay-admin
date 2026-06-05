@@ -1,15 +1,3 @@
-/**
- * Round-trip + envelope-shape tests for the v2 encrypted-report
- * machinery. Pins both the encoder, the defensive decoder, the
- * decryption helper, and the typed error classification.
- *
- * The producer (`createPasswordSeed` in `data/t3rminal-config-qr.ts`)
- * generates `password = base64url(sha256(...))` — 32 random bytes
- * base64url-encoded with `=` stripped. We exercise the full chain
- * with a real password seed so the test catches any byte-level drift
- * between the QR producer and the admin consumer.
- */
-
 import { describe, expect, it } from "vitest";
 
 import {
@@ -25,9 +13,7 @@ import {
   REPORT_KEY_BYTES,
   type EncryptedReportMeta,
 } from "@features/reports/encrypted-report.ts";
-import { createPasswordSeed } from "@shared/utils/t3rminal-config-qr.ts";
-
-// ── Fixtures ────────────────────────────────────────────────────
+import { createPasswordSeed } from "@shared/lib/t3rminal-config-qr.ts";
 
 const PUBKEY = new Uint8Array(32).fill(7);
 
@@ -47,8 +33,6 @@ const SAMPLE_REPORT_JSON = JSON.stringify({
   dayFinalized: true,
   transactions: [],
 });
-
-// ── base64url + hex helpers ─────────────────────────────────────
 
 describe("base64UrlDecode", () => {
   it("round-trips a known producer-shaped password", () => {
@@ -111,8 +95,6 @@ describe("passwordToKey", () => {
     expect(() => passwordToKey("AQID")).toThrow(/decodes to 3 bytes/);
   });
 });
-
-// ── Decoder ─────────────────────────────────────────────────────
 
 describe("decodeEncryptedReportEnvelope", () => {
   it("accepts a well-formed v2 envelope", () => {
@@ -191,8 +173,6 @@ describe("decodeEncryptedReportEnvelope", () => {
     }
   });
 });
-
-// ── Encrypt → decrypt round-trip ─────────────────────────────────
 
 describe("encryptReportV2 + decryptReportV2", () => {
   it("round-trips the report verbatim", () => {

@@ -1,9 +1,5 @@
-/**
- * Single copyable address row used inside `AdminAccountCard`. Surfaces
- * the SS58 / H160 representation and a Ghost copy button that flips to
- * a green checkmark on success. Pulls clipboard state from
- * `useFeedback()`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useFeedbackStore } from "@shared/store/use-feedback-store.ts";
 import { Icon } from "@shared/components/Icon.tsx";

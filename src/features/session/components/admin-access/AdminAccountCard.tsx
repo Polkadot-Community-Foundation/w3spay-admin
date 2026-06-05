@@ -1,39 +1,32 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 /**
- * Identity card surfaced by the access gate (and by the Account tab) —
- * two copyable rows: the H160 admin grant address (the value the
- * contract owner needs) and the SS58 the user is signed in with.
+ * The SS58 encoding of the same account is intentionally not shown — surfacing both
+ * addresses only confused non-crypto pilot users, and the access script consumes this
+ * (pallet-revive H160) form.
  */
 
 import { shortenAddress } from "@shared/utils/format.ts";
-import { ACard, ADotted, AEye } from "@shared/components/primitives.tsx";
+import { ACard, AEye } from "@shared/components/primitives.tsx";
 import { AddressBlock } from "./AddressBlock.tsx";
 import type { AdminAccountCardProps } from "./types.ts";
 
 export function AdminAccountCard({
   identity,
-  title = "Application account",
+  title = "Your account",
   compact = false,
 }: AdminAccountCardProps) {
   return (
     <ACard padding={compact ? 12 : 16}>
       <AEye>{title}</AEye>
       <AddressBlock
-        label="Admin grant H160"
-        value={identity.adminH160}
-        shortValue={shortenAddress(identity.adminH160)}
-        copyLabel="admin-h160"
-        copyText="Copy H160"
+        label="Account address"
+        value={identity.copyTarget}
+        shortValue={shortenAddress(identity.copyTarget)}
+        copyLabel="account-address"
+        copyText="Copy address"
         primary
-      />
-
-      <ADotted margin={compact ? 10 : 12} />
-
-      <AddressBlock
-        label={`Product account · ${identity.productIdentifier} · ${identity.derivationIndex}`}
-        value={identity.ss58Address}
-        shortValue={shortenAddress(identity.ss58Address, 8, 6)}
-        copyLabel="ss58"
-        copyText="Copy SS58"
       />
     </ACard>
   );

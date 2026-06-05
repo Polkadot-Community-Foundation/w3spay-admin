@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type * as HostPackage from "@/sdk";
+import type * as HostPackage from "@shared/chain/host";
 
-// Stable test doubles for the chain config resolved from SELECTED_NETWORK.
 const TEST_GENESIS = "0xtest000000000000000000000000000000000000000000000000000000000000" as const;
 const TEST_WS = "wss://test.example.com";
 
@@ -15,7 +14,7 @@ const getOrCreateClient = vi.fn(() => rawClient);
 const resetClientCache = vi.fn();
 const isInHost = vi.fn<() => boolean>(() => false);
 
-vi.mock("@shared/api/host-connection.ts", () => ({
+vi.mock("@shared/chain/host-connection.ts", () => ({
   isInHost,
   detectHostEnvironment: () => (isInHost() ? "web-iframe" : "standalone"),
   isDevStandalone: () => false,
@@ -23,7 +22,7 @@ vi.mock("@shared/api/host-connection.ts", () => ({
   getAccountsProvider: vi.fn(),
   isHostConnected: vi.fn(() => false),
 }));
-vi.mock("@/sdk", async (importOriginal) => {
+vi.mock("@shared/chain/host", async (importOriginal) => {
   const orig = await importOriginal<typeof HostPackage>();
   return {
     ...orig,
@@ -41,7 +40,7 @@ vi.mock("@/sdk", async (importOriginal) => {
     }),
   };
 });
-vi.mock("@shared/config.ts", () => ({
+vi.mock("@/config", () => ({
   envConfig: {
     contracts: { merchantRegistryAddress: "" },
     host: {
@@ -74,7 +73,7 @@ vi.mock("@shared/config.ts", () => ({
 }));
 
 // Deferred import: the client module must observe the provider/config mocks above.
-const { useMainClient, resetMainClient } = await import("@shared/api/client.ts");
+const { useMainClient, resetMainClient } = await import("@shared/chain/client.ts");
 
 afterEach(() => {
   resetMainClient();

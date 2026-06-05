@@ -1,10 +1,5 @@
-/**
- * Tiny shared style constants for the Items tab screens.
- *
- * Held out of any single component so peer files don't duplicate the
- * icon-button shape and end up drifting on tap-target size — the design
- * is locked at 40×40 for accessibility on mobile.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { CSSProperties } from "react";
 

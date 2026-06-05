@@ -1,7 +1,3 @@
-/**
- * Dump every registered row from the W3SPay registry via pallet-revive dry-runs.
- */
-
 import { formatStatus } from "./lib/destination";
 import {
   createScriptContext,

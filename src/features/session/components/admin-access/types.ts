@@ -1,12 +1,5 @@
-/**
- * Type vocabulary for the access-gate variants. The gate produces one
- * of 12 variants (resolved by `resolveAccessVariant` in `src/app/`);
- * each variant carries just enough context to render the right CTA +
- * identity card combination.
- *
- * Clipboard / copy state is no longer threaded through props — every
- * component that needs it consumes `useFeedback()`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { AdminGrantIdentity } from "@features/session/account.ts";
 import type { ReactNode } from "react";

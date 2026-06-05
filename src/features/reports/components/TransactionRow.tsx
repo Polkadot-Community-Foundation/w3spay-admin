@@ -1,17 +1,5 @@
-/**
- * Single row in the transactions stream. Tap toggles inline detail
- * expansion; the parent owns "which sale is expanded" state because
- * only one row is open at a time.
- *
- * The row layout adapts to two contexts via `hideTerminalColumn`:
- *
- *   - Aggregate view: shows `<time> · <terminal> · <amount> <asset> <status>`
- *   - Per-terminal view: shows `<time> · <amount> <asset> <status>`
- *
- * Refund rows keep the same shape; the refund-of saleId is surfaced in
- * the inline detail panel (see `TransactionDetailInline`), with a small
- * subline pointer here so the operator can spot refunds from the row.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { StreamTransaction } from "@features/reports/transaction-stream.ts";
 import { shortAddr } from "@features/merchant/merchant-model.ts";
@@ -151,7 +139,6 @@ function StatusPill({ status }: { status: string }) {
 function formatTime(timestampMs: number, dateBucket: string): string {
   if (!Number.isFinite(timestampMs) || timestampMs <= 0) return dateBucket;
   const d = new Date(timestampMs);
-  // `Mon 14:32` style — short weekday + HH:mm in the user's local TZ.
   const weekday = d.toLocaleDateString(undefined, { weekday: "short" });
   const hh = String(d.getHours()).padStart(2, "0");
   const mm = String(d.getMinutes()).padStart(2, "0");

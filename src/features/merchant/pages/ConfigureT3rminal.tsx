@@ -1,33 +1,5 @@
-/**
- * Configure-T3rminal screen.
- *
- * Route target for `merchants/configure-t3rminal/<merchantKey>`. The
- * admin picks one of their published item configs, optionally picks a
- * restaurant profile (managed in the dedicated Restaurants tab), the
- * screen derives (or reuses) a v1 report password, persists the
- * assignment locally, encodes the QR payload as a BCTS Uniform Resource
- * (UR + dCBOR), and renders either a single-frame QR or an animated
- * multipart GIF depending on density.
- *
- * Guards:
- *   - merchant missing or not a T3rminal kind → friendly error
- *   - ready admin account missing → "sign in via host" hint
- *   - `merchantRegistryAddress` env unset (non-demo only) → "set VITE_W3SPAY_REGISTRY_ADDRESS"
- *   - no published item configs → "publish one from Items first"
- *   - selected config has unsaved local changes → block QR generation
- *
- * The static QR fits when `qrModuleCount(ur, Low) <= DEFAULT_MAX_MODULES`
- * — checked up-front; anything denser falls back to a fountain-coded
- * animated GIF so a terminal scanner can still reassemble the payload.
- *
- * Restaurant selection is decoupled from the on-chain `merchantId`: the
- * picker defaults to whichever stored restaurant's id matches that
- * `merchantId` (preserving the pre-rename "one merchant → one profile"
- * behaviour) but the operator can pick any saved restaurant, none at
- * all, or create a new one via "+ New restaurant" — which navigates to
- * `restaurants/new/from/<merchantKey>` and routes back here with the
- * freshly-created id pre-selected through `restaurantPickerHint`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -40,19 +12,19 @@ import {
   renderUrQr,
 } from "@bcts/multipart-ur";
 
-import { resolveEffectiveRegistryAddress } from "@shared/demo/demo-contracts.ts";
-import { useSession } from "@features/session/api/use-session.ts";
+import { resolveEffectiveRegistryAddress } from "@shared/lib/demo/demo-contracts.ts";
+import { useSession } from "@features/session/contracts/use-session.ts";
 import { useFeedbackStore } from "@shared/store/use-feedback-store.ts";
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
-import { useItemConfigs } from "@features/items/api/use-item-configs.ts";
+import { useItemConfigs } from "@features/items/contracts/use-item-configs.ts";
 import { useT3rminalAssignments } from "@shared/store/use-assignments-store.ts";
 import type { UseT3rminalAssignmentsResult } from "@shared/store/t3rminal-assignments.ts";
 import { useRestaurants } from "@features/restaurants/store/use-restaurants-store.ts";
 import {
   buildT3rminalConfigPayloadV2,
   encodeT3rminalConfigPayloadV2,
-} from "@shared/utils/t3rminal-config-qr.ts";
+} from "@shared/lib/t3rminal-config-qr.ts";
 import { isConfigDirty } from "@features/items/item-config-drafts.ts";
 import { shortAddr, type AdminMerchant } from "@features/merchant/merchant-model.ts";
 import {
@@ -60,7 +32,7 @@ import {
   type Restaurant,
   type UseRestaurantsResult,
 } from "@features/restaurants/restaurants.ts";
-import type { MerchantProfile } from "@/shared/config-qr";
+import type { MerchantProfile } from "@/shared/lib/config-qr";
 import type { UseItemConfigsResult } from "@features/items/item-configs.ts";
 import { CopyableRow } from "@shared/components/CopyableRow.tsx";
 import { Icon } from "@shared/components/Icon.tsx";
@@ -112,7 +84,6 @@ export function ConfigureT3rminalRoute({ merchantKey }: ConfigureT3rminalRoutePr
     [merchants, merchantKey],
   );
 
-  // Guard pyramid
   if (!merchant) {
     return <Guard onBack={onBack} message="Merchant not found." />;
   }

@@ -1,21 +1,9 @@
-/**
- * Orchestrator for the Reports → Transactions stream view.
- *
- * Used by both the aggregate Reports tab (many terminals) and the
- * per-terminal drill-in (one terminal, with the terminal column
- * suppressed). The caller resolves index entries + QR passwords; this
- * component owns the period / status filter / pagination / inline
- * expansion state and the resulting fan-out via
- * {@link useTransactionsStream}.
- *
- * Defaults: period = 7d, page size = 50, status filter = all. State
- * lives in local React state so deep-linking isn't supported — a
- * later iteration can promote it to the hash route if needed.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useMemo, useState } from "react";
 
-import { useTransactionsStream } from "@features/reports/api/report-queries.ts";
+import { useTransactionsStream } from "@features/reports/contracts/report-queries.ts";
 import type {
   StreamTransaction,
   StreamWindow,
@@ -35,7 +23,6 @@ const PAGE_SIZE = 50;
 
 export interface TransactionsViewProps {
   readonly terminals: ReadonlyArray<TransactionsStreamTerminal>;
-  /** When true the row + detail layouts hide terminal labels. */
   readonly hideTerminalColumn: boolean;
   readonly gatewayBase: string;
   /**
@@ -188,8 +175,6 @@ export function TransactionsView({
   );
 }
 
-// ── Sub-blocks ─────────────────────────────────────────────────────
-
 function EmptyStream({
   totalDays,
   state,
@@ -307,8 +292,6 @@ function FailuresBanner({
     </div>
   );
 }
-
-// ── Helpers ────────────────────────────────────────────────────────
 
 function filterByStatus(
   transactions: ReadonlyArray<StreamTransaction>,

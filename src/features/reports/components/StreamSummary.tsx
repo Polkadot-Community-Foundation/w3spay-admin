@@ -1,11 +1,5 @@
-/**
- * Totals card for the Reports → Transactions stream.
- *
- * Shows the count, per-asset Finished volume, the active window label,
- * and a short "X / N days decrypted" status when the stream is still
- * resolving. The asset totals are gross — refunds aren't subtracted (see
- * `summarize`'s contract).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useMemo } from "react";
 

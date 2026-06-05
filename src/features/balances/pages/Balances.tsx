@@ -1,21 +1,12 @@
-/**
- * Balances tab — registered, non-revoked payout destinations.
- *
- * The registry stores identity, lifecycle, and destination. It does NOT
- * store payment totals or rates, so this view does not invent any. When
- * a payment-aggregate source is wired in, totals can be layered on top
- * without changing the underlying list.
- *
- * Reads merchants from `useMerchants()`. Sort state is local.
- * Row taps go through `useRouter().navigate` to the merchant detail.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState } from "react";
 
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
 import { useNavigate } from "@tanstack/react-router";
-import { useConfig } from "@shared/config.ts";
-import { useTokenBalances } from "@features/balances/api/balance-queries.ts";
+import { useConfig } from "@/config";
+import { useTokenBalances } from "@features/balances/contracts/balance-queries.ts";
 import { AHead, type Density } from "@shared/components/primitives.tsx";
 import { Icon } from "@shared/components/Icon.tsx";
 import { COLOR } from "@shared/components/tokens.ts";

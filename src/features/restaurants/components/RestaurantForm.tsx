@@ -1,13 +1,5 @@
-/**
- * Restaurants tab — create or edit a restaurant profile.
- *
- * A single form covering both modes: `mode === "new"` exposes the slug
- * `id` input and emits a "Create" CTA; `mode === "edit"` locks the id
- * (records are keyed by it) and emits a "Save changes" CTA alongside a
- * delete affordance.
- *
- * Pure presentational — mutations bubble up to the orchestrator.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState } from "react";
 
@@ -36,13 +28,10 @@ export interface RestaurantFormProps {
   mode: RestaurantFormMode;
   form: RestaurantFormState;
   setForm: (next: RestaurantFormState) => void;
-  /** Validation/persistence error to surface near the submit button. */
   error: string | null;
-  /** Hint shown next to the back button — context (e.g. "Configure T3rminal"). */
   cancelLabel?: string;
   onBack: () => void;
   onSubmit: () => void;
-  /** Present only in edit mode. */
   onDelete?: () => void;
 }
 

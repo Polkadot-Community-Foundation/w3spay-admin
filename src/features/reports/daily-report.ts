@@ -1,15 +1,5 @@
-/**
- * `DailyReport` mirror — the JSON shape T3rminal-v1 puts on Bulletin
- * Chain inside the encrypted envelope. Mirrored locally so the admin
- * console can decode reports without a build-time dependency on
- * `apps/t3rminal-v1` (which is a Next app with its own toolchain).
- *
- * Authoritative producer: `apps/t3rminal-v1/lib/hooks/use-bulletin.ts:44`.
- * Keep these types compatible — extra fields are tolerated by
- * `parseDailyReport` so a forward-version producer doesn't break us.
- */
-
-// ── Public types ───────────────────────────────────────────────────
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 export interface DailyReportItem {
   readonly name: string;
@@ -52,8 +42,6 @@ export interface DailyReport {
   readonly dayFinalized: boolean;
   readonly transactions: ReadonlyArray<DailyReportTransaction>;
 }
-
-// ── Defensive parser ───────────────────────────────────────────────
 
 /**
  * Tolerant `DailyReport` decoder. Required string/number fields are

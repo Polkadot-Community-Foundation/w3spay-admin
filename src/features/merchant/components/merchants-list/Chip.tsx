@@ -1,6 +1,5 @@
-/**
- * Filter chip used in the status-filter row of the merchants directory.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

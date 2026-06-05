@@ -1,10 +1,5 @@
-/**
- * Renders the active feedback toast from `use-feedback-store`.
- *
- * Mounted once at the app root (replaces the `<AToast/>` the old
- * `<FeedbackProvider>` rendered inline). Subscribes only to the `toast`
- * slice, so clipboard-copy churn (`copiedField`) never re-renders it.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useFeedbackStore } from "@shared/store/use-feedback-store.ts";
 import { AToast } from "./Toast.tsx";

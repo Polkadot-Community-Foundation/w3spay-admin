@@ -1,7 +1,5 @@
-/**
- * Tabular-numeric mono span. Use everywhere numbers should align across
- * rows (balances, terminal IDs, sequence numbers).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 
@@ -12,7 +10,6 @@ export interface AMonoProps {
   size?: number;
   color?: string;
   weight?: number;
-  /** Native tooltip shown on hover — used to surface full values for truncated labels. */
   title?: string;
 }
 

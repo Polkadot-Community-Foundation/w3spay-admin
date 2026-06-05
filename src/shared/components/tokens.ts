@@ -1,10 +1,5 @@
-/**
- * W3sPay admin design tokens.
- *
- * Lifted verbatim from `admin-data.jsx` in the Claude Design handoff so the
- * admin console feels like the same product as the cashier-facing w3spay
- * surface. Stone-warm monochrome palette + semantic state colours.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 export const COLOR = {
   bg: "#0f0f0f",
@@ -21,7 +16,6 @@ export const COLOR = {
   green: "#22c55e",
   red: "#ef4444",
   blue: "#60a5fa",
-  // status pill foreground tints
   greenSoft: "#86efac",
   amberSoft: "#fcd34d",
   redSoft: "#fca5a5",

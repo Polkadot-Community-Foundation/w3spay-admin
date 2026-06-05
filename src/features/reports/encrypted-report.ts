@@ -1,58 +1,23 @@
-/**
- * Encrypted daily-report envelope (v2) emitted by future T3rminal builds and
- * consumed by the W3sPay admin Reports surface.
- *
- * Encryption is XChaCha20-Poly1305 keyed by the QR-shared `reportPassword`.
- * The QR password is a base64url-encoded 32-byte sha256 digest minted by
- * `createPasswordSeed` in `t3rminal-config-qr.ts` and persisted on both
- * sides — admin in `T3rminalAssignmentV1.reportPassword`, terminal in the
- * payload it scanned. Same secret on both ends, no per-recipient wrapping.
- *
- * Compatibility:
- *   - v2 (`{ v: 2, scheme: "qr-password-xchacha20-v1", ... }`): decrypted
- *     here. The current scheme.
- *   - v1 (T3rminal's pre-existing X25519 sealed-box envelopes): detected,
- *     surfaced to the UI as "legacy-v1, admin cannot decrypt". This stops
- *     the Reports screen from masquerading a recognised-but-undecryptable
- *     payload as corruption.
- *   - Anything else: `invalid`. The decoder is intentionally strict so a
- *     future v3 isn't silently misclassified as v2.
- *
- * Nothing in this module touches the network or chain — it's a pure
- * encode/decode + symmetric-crypto helper. Wire it through
- * `bulletin/fetch-report.ts` for the fetch side and through
- * `hooks/use-decrypted-report.ts` for the React-state machine.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { xchacha20poly1305 } from "@noble/ciphers/chacha.js";
 import { randomBytes } from "@noble/hashes/utils.js";
 
-// ── Constants ───────────────────────────────────────────────────────
-
-/** v2 envelope schema marker. v3 would bump this. */
 export const ENCRYPTED_REPORT_VERSION_V2 = 2 as const;
 
-/**
- * Identifier baked into every v2 envelope. Different `scheme` values can
- * coexist under `v: 2` if we ever introduce a second symmetric algorithm.
- * Today there is only one.
- */
 export const ENCRYPTED_REPORT_SCHEME_V1 = "qr-password-xchacha20-v1" as const;
 
-/** XChaCha20-Poly1305 nonce length. */
 export const XCHACHA_NONCE_BYTES = 24;
 
-/** Required key length for the symmetric scheme. */
 export const REPORT_KEY_BYTES = 32;
-
-// ── Envelope types ──────────────────────────────────────────────────
 
 export interface EncryptedReportEnvelopeV2 {
   readonly v: typeof ENCRYPTED_REPORT_VERSION_V2;
   readonly scheme: typeof ENCRYPTED_REPORT_SCHEME_V1;
   /**
    * Hex-encoded `nonce(24) || ciphertext` produced by XChaCha20-Poly1305.
-   * No `0x` prefix — matches the t3rminal-v1 producer's convention.
+   * No `0x` prefix — matches the upstream producer's convention.
    */
   readonly encrypted: string;
   readonly meta: EncryptedReportMeta;
@@ -66,7 +31,6 @@ export interface EncryptedReportEnvelopeV2 {
 export interface EncryptedReportMeta {
   /** `YYYY-MM-DD`, same form the terminal stores on chain. */
   readonly date: string;
-  /** Number of transactions in the report — pure display aid. */
   readonly txCount: number;
   /**
    * Short identifier for the source terminal. Today the producer uses a
@@ -86,8 +50,6 @@ export type EncryptedReportEnvelope =
   | { readonly kind: "v2"; readonly envelope: EncryptedReportEnvelopeV2 }
   | { readonly kind: "legacy-v1"; readonly meta: EncryptedReportMeta | null }
   | { readonly kind: "invalid"; readonly reason: string };
-
-// ── Decoder ────────────────────────────────────────────────────────
 
 /**
  * Defensively interpret arbitrary JSON-decoded input as an envelope.
@@ -133,7 +95,7 @@ export function decodeEncryptedReportEnvelope(raw: unknown): EncryptedReportEnve
     };
   }
 
-  // T3rminal-v1 pre-existing envelope: `{ v: 1, encrypted, recipients[], meta }`.
+  // The upstream producer's pre-existing envelope: `{ v: 1, encrypted, recipients[], meta }`.
   // We can identify it but cannot decrypt without the recipient's X25519
   // secret key. Surface meta when present so the UI can still show date /
   // tx-count.
@@ -167,8 +129,6 @@ function decodeMeta(raw: unknown): EncryptedReportMeta | null {
     encryptedAt: m.encryptedAt,
   };
 }
-
-// ── Decrypt / encrypt ───────────────────────────────────────────────
 
 export class DecryptReportError extends Error {
   constructor(
@@ -271,8 +231,6 @@ export function encryptReportV2(
   };
 }
 
-// ── Password / key derivation ──────────────────────────────────────
-
 /**
  * Convert the QR-shared `reportPassword` string into a 32-byte symmetric
  * key.
@@ -301,8 +259,6 @@ export function passwordToKey(reportPassword: string): Uint8Array {
   return decoded;
 }
 
-// ── Encoding helpers ───────────────────────────────────────────────
-
 /**
  * Base64url decode (RFC 4648 §5, no padding). Mirrors the encoder in
  * `t3rminal-config-qr.ts`. Returns `null` on invalid input rather than
@@ -310,7 +266,6 @@ export function passwordToKey(reportPassword: string): Uint8Array {
  */
 export function base64UrlDecode(value: string): Uint8Array | null {
   if (typeof value !== "string") return null;
-  // Convert base64url → base64 by replacing chars and re-padding.
   const padded = value
     .replace(/-/g, "+")
     .replace(/_/g, "/");

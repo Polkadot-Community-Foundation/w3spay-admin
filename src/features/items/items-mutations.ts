@@ -1,16 +1,5 @@
-/**
- * Pure mutation functions for item-configs (flat-items model).
- *
- * Each operation takes the current `configs` array and returns either a
- * new array (no in-place mutation) or a structured error. The hook in
- * `hooks/use-item-configs.ts` wraps these in `useState` setters; screen
- * code consumes them via that hook so the React layer never holds
- * mutation logic.
- *
- * Item-level mutations live alongside in `items-item-mutations.ts` so
- * the file stays under the 200-line budget; helpers are exported here so
- * both modules touch the same primitives.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ItemConfig } from "./items-model.ts";
 import { slugify } from "./items-model.ts";
@@ -44,8 +33,6 @@ export function replaceConfig(
 ): ReadonlyArray<ItemConfig> {
   return configs.map((c) => (c.id === next.id ? next : c));
 }
-
-// ── Config-level operations ─────────────────────────────────────────
 
 export function createConfig(
   configs: ReadonlyArray<ItemConfig>,

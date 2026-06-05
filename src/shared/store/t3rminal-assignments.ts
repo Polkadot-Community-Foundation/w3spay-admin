@@ -1,21 +1,13 @@
-/**
- * Local-only assignment records binding a T3rminal merchant row to a
- * published item config. Persisted via `useTerminalStore` (host KV or
- * `localStorage`) — not pushed to the merchant registry contract; the
- * QR-payload contract intentionally keeps terminal ↔ config wiring on
- * the admin device.
- *
- * Storage shape is versioned so future schema rotations can detect old
- * payloads without inferring from absence-of-fields.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
-import { bytesToHex, hexToBytes } from "@shared/utils/address.ts";
+import { bytesToHex, hexToBytes } from "@shared/lib/address.ts";
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
 import type { Item, ItemConfig } from "@features/items/items-model.ts";
 import {
   T3RMINAL_REPORT_PASSWORD_SCHEME_V1,
   createPasswordSeed,
-} from "@shared/utils/t3rminal-config-qr.ts";
+} from "@shared/lib/t3rminal-config-qr.ts";
 
 /** Stable storage key under the admin app's KV prefix. */
 export const T3RMINAL_ASSIGNMENTS_KEY = "t3rminal-assignments/v1" as const;
@@ -24,10 +16,8 @@ export interface T3rminalAssignmentV1 {
   readonly merchantKey: string;
   readonly itemConfigId: string;
   /**
-   * CID of the published item config snapshot. Retained on the admin
-   * device for operator audit/history so the assignment list shows
-   * which Bulletin record was bound at QR-issue time. Not part of the
-   * v2 QR wire payload — the v2 QR carries the full item config body.
+   * CID of the published item config snapshot, retained on-device for the
+   * assignment list. Not part of the v2 QR payload.
    */
   readonly itemConfigCid: string;
   /** SS58 of the merchant's payout destination — pinned at QR-issue time. */
@@ -40,10 +30,8 @@ export interface T3rminalAssignmentV1 {
   readonly adminPublicKeyHex: `0x${string}`;
   readonly issuedAt: string;
   /**
-   * Wire form of the most recently issued QR for this assignment.
-   * `1` = legacy JSON pointer payload, `2` = BCTS UR with the full
-   * item config inline. Absent on records written before v2 shipped,
-   * which by definition are v1 — decoders treat `undefined` as `1`.
+   * Wire form of the most recently issued QR. `1` = legacy JSON pointer,
+   * `2` = BCTS UR with full config inline. Absent records are v1 (`undefined` → `1`).
    */
   readonly payloadVersion?: 1 | 2;
   /** Light snapshot for the audit / regenerate UI. */
@@ -122,17 +110,13 @@ export function itemSummaryFor(items: ReadonlyArray<Item>): { count: number; sam
   return { count: items.length, sampleNames: items.slice(0, 3).map((i) => i.name) };
 }
 
-/** Hex helpers re-exported so the screens don't reach into util/address. */
 export const saltToHex = (bytes: Uint8Array): `0x${string}` => bytesToHex(bytes);
 export const hexToSalt = (hex: `0x${string}`): Uint8Array => hexToBytes(hex);
 
 /**
- * Pure helper that mints (or refreshes) an assignment record from the
- * resolved building blocks. Re-uses `existing.reportPassword` /
- * `existing.passwordSaltHex` unless `regeneratePassword` is true.
- *
- * Lifted out of the `useT3rminalAssignments` hook so the password-
- * preservation contract can be unit-tested without mounting React.
+ * Mints (or refreshes) an assignment record from the resolved building blocks.
+ * Reuses `existing` password/salt unless `regeneratePassword`. Pure (no React)
+ * so the password-preservation contract is unit-testable.
  */
 export interface MintAssignmentArgs {
   readonly merchant: AdminMerchant;
@@ -142,11 +126,7 @@ export interface MintAssignmentArgs {
   readonly existing: T3rminalAssignmentV1 | null;
   readonly regeneratePassword: boolean;
   readonly nowIso: string;
-  /**
-   * Wire format the freshly minted QR will use. Defaults to v2 — the
-   * BCTS UR + dCBOR transport — so new admin builds always issue v2
-   * QR codes. Callers may force v1 for legacy migrations.
-   */
+  /** Wire format for the minted QR. Defaults to v2 (BCTS UR + dCBOR). */
   readonly payloadVersion?: 1 | 2;
 }
 

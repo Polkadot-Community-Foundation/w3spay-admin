@@ -1,11 +1,9 @@
-/**
- * Single merchant row in the Balances tab — leaderboard-style rank,
- * name, terminal/short address, token balance.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
-import { useConfig } from "@shared/config.ts";
+import { useConfig } from "@/config";
 import { shortAddr, shortTerminalId, type AdminMerchant } from "@features/merchant/merchant-model.ts";
-import { formatTokenAmount } from "@features/balances/api/token-balance.ts";
+import { formatTokenAmount } from "@features/balances/contracts/token-balance.ts";
 import { AMono, type Density } from "@shared/components/primitives.tsx";
 import { Spinner } from "@shared/components/Spinner.tsx";
 import { COLOR, FONT } from "@shared/components/tokens.ts";

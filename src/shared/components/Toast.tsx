@@ -1,10 +1,5 @@
-/**
- * Toast / snackbar — pinned to the bottom of the phone canvas, slides
- * in over the active screen.
- *
- * Ported from `admin-ui.jsx::AToast`. Three tones map to the semantic
- * colour palette: ok (green), warn (amber), err (red).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "./tokens.ts";
 import { Spinner } from "./Spinner.tsx";
@@ -32,9 +27,6 @@ export function AToast({ message, tone = "ok", loading = false }: AToastProps) {
         position: "fixed",
         left: 16,
         right: 16,
-        // Float above the sticky action footer and the home indicator.
-        // 88px clears a 50px primary button + ~16px footer padding +
-        // safe-area-inset-bottom on devices with a notch.
         bottom: "calc(env(safe-area-inset-bottom) + 88px)",
         background: COLOR.surface,
         border: `1px solid ${COLOR.border}`,

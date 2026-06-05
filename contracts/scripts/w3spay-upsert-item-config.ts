@@ -1,12 +1,3 @@
-/**
- * Upsert an item-config CID record on the W3SPay registry via pallet-revive.
- *
- * Inputs (CLI flag OR W3SPAY_* env var):
- *   --config-id    / W3SPAY_CONFIG_ID
- *   --config-cid   / W3SPAY_CONFIG_CID
- *   --config-size  / W3SPAY_CONFIG_SIZE
- */
-
 import { parseArgv, requireArg } from "./lib/argv";
 import {
   createScriptContext,

@@ -1,7 +1,3 @@
-/**
- * Update destinationAccountId and/or displayName for an existing W3SPay terminal via pallet-revive.
- */
-
 import { parseArgv, readArg, requireArg } from "./lib/argv";
 import { formatStatus, parseDestinationAccountId } from "./lib/destination";
 import {

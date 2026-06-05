@@ -1,7 +1,5 @@
-/**
- * Soft-bordered surface card. When `onClick` is supplied the card lifts on
- * hover and acts as a pressable row (used in lists).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { CSSProperties, ReactNode } from "react";
 

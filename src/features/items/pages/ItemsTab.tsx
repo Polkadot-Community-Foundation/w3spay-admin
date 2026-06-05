@@ -1,15 +1,5 @@
-/**
- * Items tab orchestrator.
- *
- * View-driven: receives the current view via the `view` prop and uses
- * `useNavigate()` from TanStack Router for transitions.
- * Form drafts (new-config, duplicate-config, item form) are local state.
- *
- * Mutations land in `useItemConfigs` which persists drafts via the host
- * KV store and exposes a `saveAllChanged` action that publishes every
- * locally-dirty config to Bulletin Chain and updates the registry
- * contract.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useMemo, useState } from "react";
 
@@ -17,7 +7,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Icon } from "@shared/components/Icon.tsx";
 import { APrimary, ASecondary } from "@shared/components/primitives.tsx";
 import { COLOR } from "@shared/components/tokens.ts";
-import { useItemConfigs } from "@features/items/api/use-item-configs.ts";
+import { useItemConfigs } from "@features/items/contracts/use-item-configs.ts";
 import type { UseItemConfigsResult } from "@features/items/item-configs.ts";
 import { ItemsList, ItemsListSkeleton } from "@features/items/components/ItemsList.tsx";
 import { ItemsNewConfig, BLANK_NEW_CONFIG, type NewConfigForm } from "@features/items/components/ItemsNewConfig.tsx";

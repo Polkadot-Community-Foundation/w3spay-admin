@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 // `./instrument` MUST be the first import. It wires Sentry's global
 // error handlers before any other product module evaluates so an
 // import-time throw still surfaces in the dashboard.

@@ -1,13 +1,7 @@
-/**
- * Payout destination block in the merchant detail screen. Three
- * copyable representations of the same destination — SS58, raw
- * AccountId32, and (when the destination is a left-padded H160) the
- * derived H160 — rendered through the shared `<CopyableRow>` so each
- * line copies the full value on click and truncates with an ellipsis
- * when the address overflows the row.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
-import { useCanWriteMerchants } from "@features/merchant/api/use-merchant-write-ops.ts";
+import { useCanWriteMerchants } from "@features/merchant/contracts/use-merchant-write-ops.ts";
 import { useNavigate } from "@tanstack/react-router";
 import { type AdminMerchant } from "@features/merchant/merchant-model.ts";
 import { Icon } from "@shared/components/Icon.tsx";

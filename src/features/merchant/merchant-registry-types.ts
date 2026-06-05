@@ -1,17 +1,18 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
 import type {
   AdminMerchant,
   MerchantForm,
   MerchantFormErrors,
   MerchantKind,
 } from "./merchant-model.ts";
-import type { TxStatus } from "@/shared/api/contracts/index.ts";
-import type { AddMerchantPayload } from "@features/merchant/api/add-merchant.ts";
-import type { DeleteMerchantPayload } from "@features/merchant/api/delete-merchant.ts";
-import type { SetMerchantStatusPayload } from "@features/merchant/api/set-merchant-status.ts";
-import type { UpdateMerchantPayload } from "@features/merchant/api/update-merchant.ts";
-import type { SetMerchantDestinationPayload } from "@features/merchant/api/set-merchant-destination.ts";
-
-// ── Registry contract write actions ──────────────────────────────────────
+import type { TxStatus } from "@/shared/chain/contracts/index.ts";
+import type { AddMerchantPayload } from "@features/merchant/contracts/add-merchant.ts";
+import type { DeleteMerchantPayload } from "@features/merchant/contracts/delete-merchant.ts";
+import type { SetMerchantStatusPayload } from "@features/merchant/contracts/set-merchant-status.ts";
+import type { UpdateMerchantPayload } from "@features/merchant/contracts/update-merchant.ts";
+import type { SetMerchantDestinationPayload } from "@features/merchant/contracts/set-merchant-destination.ts";
 
 export interface MerchantRegistryActions {
   registerMerchant(
@@ -35,8 +36,6 @@ export interface MerchantRegistryActions {
     onStatus?: (status: TxStatus) => void,
   ): Promise<string>;
 }
-
-// ── Write-lifecycle types ─────────────────────────────────────────────────
 
 export type SubmitState = "idle" | "signing" | "submitting" | "finalized" | "error";
 

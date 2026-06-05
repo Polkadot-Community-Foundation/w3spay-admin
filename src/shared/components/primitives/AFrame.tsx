@@ -1,7 +1,5 @@
-/**
- * App-wide frame: scrollable body with optional sticky footer, safe-area
- * insets for iOS/Android. Wraps every screen.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

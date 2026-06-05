@@ -1,11 +1,5 @@
-/**
- * Detail-view container for the Items tab.
- *
- * Receives the parent's `useItemConfigs` hook plus a navigation API and
- * stitches together the per-row actions so `ItemsTab.tsx` can stay
- * focused on routing between views. Clipboard state comes from
- * `useFeedback()`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useFeedbackStore } from "@shared/store/use-feedback-store.ts";
 import { Icon } from "@shared/components/Icon.tsx";

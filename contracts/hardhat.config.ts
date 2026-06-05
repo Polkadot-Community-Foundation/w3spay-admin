@@ -15,7 +15,6 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {},
-    // Paseo Asset Hub Testnet
     paseoAssetHub: {
       polkadot: { target: "evm" },  
       url: "https://paseo-asset-hub-next-rpc.polkadot.io",

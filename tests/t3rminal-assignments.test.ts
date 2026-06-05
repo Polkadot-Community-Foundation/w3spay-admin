@@ -1,20 +1,3 @@
-/**
- * T3rminal-merchant ↔ item-config assignment contract.
- *
- * The local assignment record is the only persistence layer that holds
- * the `(merchantKey, itemConfigCid, reportPassword)` triple. These tests
- * pin three invariants that the Configure-T3rminal screen relies on:
- *
- *   - First assignment derives a password from the admin product
- *     public key + a fresh salt.
- *   - Re-selecting a different published config for the same merchant
- *     keeps the previously-derived password unchanged.
- *   - Explicit regeneration rotates BOTH the salt and the password.
- *
- * We test against `mintAssignmentRecord` directly so we don't have to
- * mount React + a fake KV store just to exercise the rule.
- */
-
 import { describe, expect, it } from "vitest";
 
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";

@@ -56,7 +56,6 @@ describe("W3SPayMerchantRegistry", function () {
         .withArgs(admin.address);
       expect(await registry.isAdmin(admin.address)).to.be.true;
 
-      // Granted admin can now write.
       await registry.connect(admin).registerMerchant("m", "t", DEST_ALPHA, "Display");
 
       await expect(registry.connect(owner).removeAdmin(admin.address))
@@ -113,7 +112,6 @@ describe("W3SPayMerchantRegistry", function () {
       expect(byKey.status).to.equal(STATUS_ACTIVE);
       expect(byKey.addedAt).to.equal(byKey.updatedAt);
 
-      // String-based view returns the same row.
       const byIds = await registry.getMerchant("funkhaus", "bar-east-01");
       expect(byIds.destinationAccountId).to.equal(DEST_ALPHA);
       expect(byIds.status).to.equal(STATUS_ACTIVE);
@@ -397,7 +395,6 @@ describe("W3SPayMerchantRegistry", function () {
       await registry.registerMerchant("m1", "t1", DEST_ALPHA, "d");
       expect(await registry.getVersion()).to.equal(1);
 
-      // Reverted call must not bump.
       await expect(
         registry.registerMerchant("m1", "t1", DEST_BETA, "d")
       ).to.be.reverted;
@@ -523,8 +520,6 @@ describe("W3SPayMerchantRegistry", function () {
       await registry.upsertItemConfig("b", CID_V2, SIZE_V2);
       await registry.registerMerchant("m2", "t2", DEST_BETA, "d2");
       await registry.upsertItemConfig("c", CID, SIZE);
-      // Remove the merchant and one item-config; enumeration should
-      // shrink in each domain independently.
       await registry.removeMerchant("m1", "t1");
       await registry.removeItemConfig("b");
 
@@ -545,7 +540,6 @@ describe("W3SPayMerchantRegistry", function () {
         .to.emit(registry, "ItemConfigUpserted")
         .withArgs(CONFIG_ID, CID, SIZE);
 
-      // The new admin can also remove records.
       await expect(registry.connect(admin).removeItemConfig(CONFIG_ID))
         .to.emit(registry, "ItemConfigRemoved")
         .withArgs(CONFIG_ID);

@@ -1,15 +1,9 @@
-/**
- * Application root.
- *
- * Owns the `?telemetry-test=1` short-circuit and renders the provider
- * shell. Everything stateful lives below in Zustand stores / TanStack
- * Query hooks; this file only composes the framework providers and picks
- * the telemetry-test surface vs. the router.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { RouterProvider } from "@tanstack/react-router";
 
-import { journeyTracker } from "@shared/utils/telemetry.ts";
+import { journeyTracker } from "@shared/lib/telemetry.ts";
 import { AppProviders } from "./providers.tsx";
 import { router } from "./router/index.tsx";
 import { TelemetryTestScreen, isTelemetryTestRoute } from "./TelemetryTest.tsx";

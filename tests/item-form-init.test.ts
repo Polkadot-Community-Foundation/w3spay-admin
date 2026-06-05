@@ -7,14 +7,6 @@ import {
   itemFormForRoute,
 } from "@features/items/components/item-form-init.ts";
 
-/**
- * The form-init helpers are the fix for the "edit screen opens blank"
- * bug: ItemsTab remounts on every intra-tab navigation, so the form's
- * initial state must be derivable from the route alone. These tests pin
- * that derivation — they would fail if a future change went back to
- * threading values through navigation callbacks.
- */
-
 const DRINKS: ItemConfig = {
   id: "drinks",
   name: "Drinks",

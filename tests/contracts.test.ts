@@ -1,35 +1,16 @@
-/**
- * Tests for app-specific merchant-registry helpers that compose
- * `@/sdk/contracts` with this app's registry ABI.
- *
- * The generic read/write/watch plumbing is covered in
- * `packages/sdk/tests/contracts.test.ts` — this file only exercises:
- *
- *  - `listMerchantEntries` — enumerates `getAllTerminalKeys`, decodes
- *    `getMerchantByKey` rows, projects to the UI-facing shape.
- *  - Hand-maintained ABI mirror — round-trip the W3SPay-specific entry
- *    points so a typo in `registry-abi.ts` can't silently break a write.
- *
- * `@shared/api/use-client.ts` is mocked so the helpers see a deterministic
- * fake `PolkadotClient` whose `getUnsafeApi()` returns vitest mocks for
- * the runtime API calls. No real chain RPC is touched.
- */
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ethers } from "ethers";
 import { Binary } from "polkadot-api";
 
-import { W3SPayMerchantRegistryABI } from "@shared/api/registry-abi.ts";
-import { listMerchantEntries } from "@features/merchant/api/list-merchant-entries.ts";
-import { envConfig } from "@shared/config.ts";
+import { W3SPayMerchantRegistryABI } from "@shared/chain/registry-abi.ts";
+import { listMerchantEntries } from "@features/merchant/contracts/list-merchant-entries.ts";
+import { envConfig } from "@/config";
 
 const REGISTRY_READ_ORIGIN = envConfig.chain.readOnlyOrigin;
 
-// ─── Fake PolkadotClient mounted through useMainClient ─────────────────
-
 const reviveCall = vi.fn();
 
-vi.mock("@shared/api/use-client.ts", () => ({
+vi.mock("@shared/chain/use-client.ts", () => ({
   useMainClient: () => ({
     client: {
       getUnsafeApi: () => ({
@@ -81,8 +62,6 @@ function encodeMerchantByKeyResult(
     iface.encodeFunctionResult("getMerchantByKey", [value]) as `0x${string}`,
   );
 }
-
-// ─── listMerchantEntries ────────────────────────────────────────────────
 
 describe("listMerchantEntries", () => {
   it("reads terminal keys, loads entries, and projects rows for the main merchant view", async () => {
@@ -150,7 +129,6 @@ describe("listMerchantEntries", () => {
     ]);
     expect(reviveCall).toHaveBeenCalledTimes(3);
 
-    // All reads ran against the configured read-only origin.
     for (const call of reviveCall.mock.calls) {
       expect(call[0]).toBe(REGISTRY_READ_ORIGIN);
     }
@@ -186,14 +164,6 @@ describe("listMerchantEntries", () => {
   });
 });
 
-// ─── setMerchantDestination ABI round-trip ─────────────────────────────
-//
-// Guards against typos in the hand-maintained TS mirror of the contract
-// ABI. The end-to-end behavioural coverage lives in the Hardhat suite;
-// here we just want to make sure ethers can encode/decode the function
-// call, and that the args we'd hand `writeContract` match the argument
-// layout the Solidity selector expects.
-
 describe("setMerchantDestination ABI", () => {
   it("encodes via ethers Interface and round-trips the args", () => {
     const dest = ("0x" + "cd".repeat(32)) as `0x${string}`;
@@ -217,12 +187,6 @@ describe("setMerchantDestination ABI", () => {
     expect(setSel).not.toBe(updSel);
   });
 });
-
-// ─── removeMerchant ABI round-trip ─────────────────────────────────────
-//
-// Backs the `useMerchantWrites().deleteMerchant` hook: the registry write
-// goes out as `removeMerchant(merchantId, terminalId)`. Guards the
-// hand-maintained ABI mirror so a typo there can't silently break delete.
 
 describe("removeMerchant ABI", () => {
   it("encodes via ethers Interface and round-trips the (merchantId, terminalId) args", () => {

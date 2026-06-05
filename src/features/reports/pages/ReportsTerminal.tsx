@@ -1,29 +1,17 @@
-/**
- * Per-terminal Reports drill-in. Same two-segment shape as the Reports
- * tab — Transactions stream (default) vs Daily reports — but scoped to
- * one merchant's `(shopKey, dates)`.
- *
- * The Daily reports segment is the original date-list + inline
- * `ReportDetailPanel` flow; the Transactions segment reuses
- * `TransactionsView` with `hideTerminalColumn={true}` and a single
- * stream input. Both share the same `useReportsCache` so days the user
- * already decrypted in the aggregate view stay decrypted here without
- * a re-fetch.
- *
- * Hides the tab bar (see `route.ts::showTabsForRoute`).
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect, useMemo, useState } from "react";
 
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
-import { envConfig } from "@shared/config.ts";
-import { resolveNetwork } from "@shared/api/host";
+import { envConfig } from "@/config";
+import { resolveNetwork } from "@shared/chain/host";
 import {
   useT3rminalReportIndex,
   type ReportIndexEntry,
   type TerminalReportIndexState,
-} from "@features/reports/api/report-index-queries.ts";
+} from "@features/reports/contracts/report-index-queries.ts";
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
 import type { T3rminalAssignmentV1 } from "@shared/store/t3rminal-assignments.ts";
 import { useT3rminalAssignments } from "@shared/store/use-assignments-store.ts";

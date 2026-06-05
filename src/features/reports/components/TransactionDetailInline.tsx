@@ -1,12 +1,5 @@
-/**
- * Inline expansion below a {@link TransactionRow}. Surfaces the
- * customer/merchant addresses, the on-chain tx hash with copy, the
- * itemised sale lines if present, and a refund pointer when applicable.
- *
- * Visual structure mirrors `TransactionCard` in `ReportDetailPanel` for
- * consistency, with the date / terminal context dropped (the row above
- * already carries them) and the txHash promoted to a copyable line.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useCallback } from "react";
 
@@ -19,7 +12,6 @@ import { COLOR, FONT } from "@shared/components/tokens.ts";
 
 export interface TransactionDetailInlineProps {
   readonly entry: StreamTransaction;
-  /** Pass `true` from per-terminal views to suppress the terminal label. */
   readonly hideTerminalColumn: boolean;
 }
 

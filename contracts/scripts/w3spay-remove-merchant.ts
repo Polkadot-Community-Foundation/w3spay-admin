@@ -1,8 +1,3 @@
-/**
- * Hard-delete a W3SPay terminal entry from the registry via pallet-revive.
- * Prefer W3SPAY_STATUS=revoked for normal lifecycle removal.
- */
-
 import { parseArgv, requireArg } from "./lib/argv";
 import { formatStatus } from "./lib/destination";
 import {

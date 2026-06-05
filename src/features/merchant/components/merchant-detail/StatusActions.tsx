@@ -1,10 +1,5 @@
-/**
- * Lifecycle action buttons at the bottom of the merchant detail screen.
- * Pause / resume / revoke / reinstate, gated on the current status, plus a
- * permanent delete that removes the registry row entirely (distinct from
- * revoke, which keeps the row in a `revoked` state). Delete is two-tap
- * confirmed because it is irreversible.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState, type CSSProperties } from "react";
 

@@ -1,7 +1,3 @@
-/**
- * Dump every published item-config CID record from the W3SPay registry.
- */
-
 import {
   createScriptContext,
   loadDefaultEnv,

@@ -1,8 +1,5 @@
-/**
- * One item row inside the config detail screen — name, SKU, CASH price,
- * plus inline edit / delete buttons. Pure presentational: every action
- * bubbles up to `ItemsDetail` and ultimately the tab orchestrator.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useState } from "react";
 

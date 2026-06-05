@@ -1,12 +1,5 @@
-/**
- * Shared pill-segment chip group used by the Reports → Transactions
- * controls (view toggle, period picker, status filter). Three controls
- * with the same visual language — one implementation, three thin
- * wrappers that own copy and the union type.
- *
- * Generic over the value union so each wrapper stays type-safe at the
- * callsite without runtime widening.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "@shared/components/tokens.ts";
 
@@ -19,7 +12,6 @@ export interface SegmentedChipsProps<T extends string> {
   readonly value: T;
   readonly items: ReadonlyArray<SegmentedChipsItem<T>>;
   readonly onChange: (next: T) => void;
-  /** Optional uppercase eyebrow shown above the chip row. */
   readonly eyebrow?: string;
 }
 

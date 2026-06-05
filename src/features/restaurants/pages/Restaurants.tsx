@@ -1,21 +1,5 @@
-/**
- * Restaurants tab orchestrator.
- *
- * View-driven: receives the active sub-view as a `view` prop and pulls
- * `navigate` from TanStack Router.
- * Each subroute mounts a different presentational screen and the
- * orchestrator owns the form state + the mutation glue against the
- * `useRestaurants` hook.
- *
- * Sub-routes:
- *   - `restaurants`              → list
- *   - `restaurants/new`          → create form (stand-alone)
- *   - `restaurants/new` w/ returnToMerchantKey → create form whose
- *     successful submit hops back to `merchants/configure-t3rminal/
- *     <merchantKey>` and stages a picker hint so the new restaurant
- *     is pre-selected there.
- *   - `restaurants/edit/<id>`    → edit form (id locked)
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -55,10 +39,6 @@ export function Restaurants({ view }: { view: RestaurantsView }) {
     return list;
   }, [restaurants.restaurants]);
 
-  // Seed the edit form when the view lands on an edit sub-view (or the
-  // underlying record refreshes), and reset it when we navigate away
-  // from that screen entirely so a stale entry doesn't leak into the
-  // next edit session.
   useEffect(() => {
     if (view.kind !== "edit") {
       setEditingId(null);
@@ -143,9 +123,6 @@ export function Restaurants({ view }: { view: RestaurantsView }) {
         setError("Restaurant name is required.");
         return;
       }
-      // Preserve the existing id even if the form somehow mutated it
-      // — edit mode renders the slug as a read-only chip, but belt &
-      // suspenders against an unexpected setForm with a different id.
       restaurants.upsertRestaurant({ ...restaurant, id: target.id });
       setError(null);
       navigate({ to: "/restaurants" });
@@ -171,7 +148,6 @@ export function Restaurants({ view }: { view: RestaurantsView }) {
     );
   }
 
-  // restaurants (list)
   return (
     <>
       <RestaurantsList

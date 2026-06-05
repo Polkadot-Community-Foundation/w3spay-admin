@@ -1,15 +1,5 @@
-/**
- * Pre-form selector for the "Register terminal" flow. Splits the path:
- *
- * - **POS** → existing manual entry: free-form `terminalId`, manual
- *   `destination`, optional display name.
- * - **T3rminal** → device-driven: paste (later: scan) the device's
- *   payout address; we derive `terminalId` from it and inherit access
- *   to this merchant's items config.
- *
- * Navigation is router-driven — back returns to `/merchants`, pick
- * advances to `/merchants/new/<mode>`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

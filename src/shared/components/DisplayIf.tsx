@@ -1,12 +1,5 @@
-/**
- * Declarative conditional render.
- *
- * Prefer `<DisplayIf condition={x}>…</DisplayIf>` over inline `{x && …}`
- * in JSX: it never renders a stray `0`/`""` when the condition is a
- * falsy non-boolean, reads as intent, and gives an explicit `fallback`
- * slot. Reference implementation — adopt in new/edited components; no
- * blanket sweep of existing `&&` sites.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { ReactNode } from "react";
 

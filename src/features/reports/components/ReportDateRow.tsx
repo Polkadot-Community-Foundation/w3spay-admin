@@ -1,9 +1,7 @@
-/**
- * Single saved-day row in the per-terminal Reports drill-in. Click
- * surfaces the encrypted payload via the detail panel.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
-import type { ReportIndexEntry } from "@features/reports/api/bulletin-index-read.ts";
+import type { ReportIndexEntry } from "@features/reports/contracts/bulletin-index-read.ts";
 import { shortAddr } from "@features/merchant/merchant-model.ts";
 import { Icon } from "@shared/components/Icon.tsx";
 import { ACard, AMono } from "@shared/components/primitives.tsx";
@@ -67,7 +65,6 @@ export function ReportDateRow({ entry, onClick }: ReportDateRowProps) {
 }
 
 function formatPublishedAt(d: Date): string {
-  // YYYY-MM-DD HH:mm (UTC) — consistent with formatIsoDateTime in merchant-model.
   const iso = d.toISOString();
   return `${iso.slice(0, 10)} ${iso.slice(11, 16)}Z`;
 }

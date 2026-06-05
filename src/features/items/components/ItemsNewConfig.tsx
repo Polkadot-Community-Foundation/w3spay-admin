@@ -1,12 +1,5 @@
-/**
- * Items tab — create-a-new-config form.
- *
- * Two fields: display name (free text) and config ID (slug). The ID
- * input self-sanitises to lowercase ASCII + dashes so the user can't
- * even type characters the contract will later reject. Submit is gated
- * until both fields are non-empty; duplicate-ID errors come back from
- * the mutation and render via `error`.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { Icon } from "@shared/components/Icon.tsx";
 import {

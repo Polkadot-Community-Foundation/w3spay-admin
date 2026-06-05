@@ -1,7 +1,3 @@
-/**
- * Change lifecycle status for an existing W3SPay terminal via pallet-revive.
- */
-
 import { parseArgv, requireArg } from "./lib/argv";
 import { formatStatus, parseMerchantStatus } from "./lib/destination";
 import {

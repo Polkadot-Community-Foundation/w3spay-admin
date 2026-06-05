@@ -1,17 +1,3 @@
-/**
- * BCTS render-pipeline integration test.
- *
- * Runs the same single-frame and animated paths the
- * Configure-T3rminal screen uses, but headlessly so we don't depend on
- * a browser with a camera. Confirms:
- *
- *  1. Density check returns a module count consistent with
- *     `DEFAULT_MAX_MODULES`.
- *  2. The static path produces a non-empty PNG byte buffer.
- *  3. An oversized config trips the multipart path, yielding ≥ 2
- *     frames and a valid animated GIF (`GIF89a` magic).
- */
-
 import { describe, expect, it } from "vitest";
 import {
   Color,
@@ -23,7 +9,7 @@ import {
   renderUrQr,
 } from "@bcts/multipart-ur";
 
-import { buildT3rminalConfigPayloadV2, encodeT3rminalConfigPayloadV2 } from "@shared/utils/t3rminal-config-qr.ts";
+import { buildT3rminalConfigPayloadV2, encodeT3rminalConfigPayloadV2 } from "@shared/lib/t3rminal-config-qr.ts";
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
 import type { ItemConfig } from "@features/items/items-model.ts";
 

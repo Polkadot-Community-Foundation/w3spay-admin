@@ -1,36 +1,49 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath, URL } from "node:url";
 
 const srcPath = (path: string) => new URL(path, import.meta.url).pathname;
 
-// W3sPay admin — pilot console. Served on its own port so it can run side
-// by side with the cashier-facing apps/w3spay.
-export default defineConfig({
+
+const NODE_BUILTINS = [
+  /^node:/,
+  "fs",
+  "path",
+  "os",
+  "util",
+  "module",
+  "child_process",
+  "fs/promises",
+];
+
+export default defineConfig(({ mode }) => ({
   base: "./",
-  // Best-effort static rewrite of the Node-only `global` identifier some
-  // transitive deps (e.g. `collections`, via `@bcts/multipart-ur` →
-  // `@bcts/uniform-resources` → `@bcts/dcbor`) reference at module top
-  // level. NOTE: this does NOT reach those CommonJS deps in the production
-  // (Rollup) build — the built bundle still ships raw `global.Set` /
-  // `global.Map` / `global.DOMTokenList`. The runtime guarantee against the
-  // resulting `global is not defined` blank screen is the inline polyfill
-  // in index.html, which runs before this bundle. This define stays only to
-  // trim the remaining `global` refs that the rewrite does catch.
+
   define: {
     global: "globalThis",
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    sentryVitePlugin({
+      org: "paritytech",
+      project: "w3spay",
+      telemetry: true,
+    }),
+  ],
   resolve: {
     alias: {
       "@": srcPath("./src"),
       "@app": srcPath("./src/app"),
       "@features": srcPath("./src/features"),
       "@shared": srcPath("./src/shared"),
+      gifenc: srcPath("./node_modules/gifenc/dist/gifenc.esm.js"),
     },
   },
   build: {
     target: "es2022",
+    sourcemap: true,
   },
   esbuild: {
     target: "es2022",
@@ -39,12 +52,7 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     server: {
-      deps: {
-        // The `@bcts/multipart-ur` ESM imports the `gifenc` CJS module
-        // by name; Vite's transform layer handles that interop, Node's
-        // does not. Inline the package so Vitest runs it through Vite.
-        inline: [/@bcts\/multipart-ur/],
-      },
+      deps: { inline: ["@bcts/multipart-ur"] },
     },
   },
-});
+}));

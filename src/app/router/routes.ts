@@ -1,12 +1,5 @@
-/**
- * Router-level metadata shared by the layouts, the gate, and the route
- * definitions.
- *
- * `TabId` is the top tab-bar identity; each route declares its owning tab
- * (and tab-bar visibility) via TanStack Router `staticData`. `TABS` is
- * the tab-bar item list and `TAB_DEFAULT_PATH` maps each tab to the path
- * a tab tap navigates to.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { TabItem } from "@shared/components/primitives.tsx";
 

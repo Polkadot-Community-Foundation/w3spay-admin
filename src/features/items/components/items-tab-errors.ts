@@ -1,10 +1,5 @@
-/**
- * User-facing copy for the mutation-error union.
- *
- * Held in its own module so the orchestrator file stays under the
- * 200-line budget and so translators have one obvious place to look
- * when this surface is localised.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { MutationError } from "@features/items/items-mutations.ts";
 

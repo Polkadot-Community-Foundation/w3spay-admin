@@ -1,21 +1,3 @@
-/**
- * Pure-helper tests for the Reports → Transactions stream layer.
- *
- * Covers the four pieces in `src/data/transaction-stream.ts`:
- *
- *   - `windowSinceMs` produces the expected rolling-N offset.
- *   - `datesInWindow` keeps the boundary day (partial-day rows handled
- *     downstream) and drops anything older.
- *   - `flattenReports` augments transactions with terminal info, sorts
- *     newest-first by `timestampMs`, and filters by `sinceMs`.
- *   - `summarize` aggregates per-asset Finished totals as bigint and
- *     excludes refunds from the sum while still counting them.
- *
- * Pure data only — no React, no host, no chain. Keeps the windowing
- * contract pinned so a future refactor (calendar buckets, net volume,
- * etc.) breaks tests rather than the screen.
- */
-
 import { describe, expect, it } from "vitest";
 
 import type {
@@ -30,8 +12,6 @@ import {
   windowSinceMs,
   type TerminalRef,
 } from "@features/reports/transaction-stream.ts";
-
-// ── Fixtures ────────────────────────────────────────────────────
 
 const TERMINAL_A: TerminalRef = {
   key: "0xaaaa",
@@ -90,8 +70,6 @@ function report(
   };
 }
 
-// ── windowSinceMs / windowDurationMs ────────────────────────────
-
 describe("windowSinceMs", () => {
   it("rolls back by the expected duration", () => {
     expect(windowSinceMs("24h", NOW)).toBe(NOW - DAY_MS);
@@ -105,8 +83,6 @@ describe("windowSinceMs", () => {
     expect(windowDurationMs("30d")).toBe(30 * DAY_MS);
   });
 });
-
-// ── datesInWindow ────────────────────────────────────────────────
 
 describe("datesInWindow", () => {
   const dates = [
@@ -161,8 +137,6 @@ describe("datesInWindow", () => {
     ]);
   });
 });
-
-// ── flattenReports ───────────────────────────────────────────────
 
 describe("flattenReports", () => {
   const dayToday = report("2026-05-26", [
@@ -234,8 +208,6 @@ describe("flattenReports", () => {
     expect(flattened[1]?.timestampMs).toBe(0);
   });
 });
-
-// ── summarize ────────────────────────────────────────────────────
 
 describe("summarize", () => {
   it("counts every tx and sums Finished by asset using amountFormatted", () => {

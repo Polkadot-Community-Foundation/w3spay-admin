@@ -1,12 +1,3 @@
-/**
- * Bulletin envelope contract.
- *
- * The envelope is the source of truth for what we hash into the CID
- * and what T3rminal devices decode after the gateway fetch. Schema
- * mismatch must produce `null` (not throw) so the gateway-fetch path
- * can fall back to "stale registry" UX gracefully.
- */
-
 import { describe, expect, it } from "vitest";
 
 import {
@@ -14,7 +5,7 @@ import {
   W3SPAY_ITEM_CONFIG_ENVELOPE_VERSION,
   buildAndEncodeItemConfigEnvelope,
   decodeItemConfigEnvelope,
-} from "@features/items/api/envelope.ts";
+} from "@features/items/contracts/envelope.ts";
 import type { ItemConfig } from "@features/items/items-model.ts";
 
 const config: ItemConfig = {

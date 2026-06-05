@@ -1,8 +1,5 @@
-/**
- * Shared types for the merchants-list subfolder: status filter + sort
- * vocabulary. Lives in its own module so leaf components import only
- * what they need.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { MerchantStatus } from "@shared/components/tokens.ts";
 

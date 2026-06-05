@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type * as HostConnectionModule from "@shared/api/host-connection.ts";
+import type * as HostConnectionModule from "@shared/chain/host-connection.ts";
 
 import {
   applyDelete,
@@ -10,16 +10,12 @@ import {
   DemoMerchantDuplicateError,
   DemoMerchantNotFoundError,
   synthesizeTxHash,
-} from "@shared/demo/demo-actions.ts";
-import { getDemoTokenBalance } from "@shared/demo/demo-balances.ts";
-import { DEMO_MERCHANT_SEED } from "@shared/demo/demo-merchants.ts";
+} from "@shared/lib/demo/demo-actions.ts";
+import { getDemoTokenBalance } from "@shared/lib/demo/demo-balances.ts";
+import { DEMO_MERCHANT_SEED } from "@shared/lib/demo/demo-merchants.ts";
 import { merchantFromRegistryRow, type RegistryMerchantRow } from "@features/merchant/merchant-model.ts";
-import { isAccountId32Hex, type AccountId32Hex } from "@shared/utils/address.ts";
+import { isAccountId32Hex, type AccountId32Hex } from "@shared/lib/address.ts";
 
-// `isDemoMode()` reads `envConfig.features.demoMode` and `isInHost()`.
-// We mock both so the test exercises each branch of the flag matrix in
-// isolation, without spinning up the real config singleton with its
-// network resolution.
 const detectHostEnvironment = vi.fn<() => "standalone" | "web-iframe" | "desktop-webview">(
   () => "standalone",
 );
@@ -33,21 +29,16 @@ const configHolder: {
   contracts: { merchantRegistryAddress: "0x1234567890abcdef1234567890abcdef12345678" },
 };
 
-vi.mock("@shared/config.ts", () => ({
+vi.mock("@/config", () => ({
   get envConfig() {
     return configHolder;
   },
 }));
-vi.mock("@shared/api/host-connection.ts", async (importOriginal) => {
-  // We only want to override `detectHostEnvironment`/`isInHost` so
-  // `isDemoMode()` can be steered; the rest of the module stays out of
-  // the test path because nothing in this file pulls those exports.
+vi.mock("@shared/chain/host-connection.ts", async (importOriginal) => {
   const _orig = await importOriginal<typeof HostConnectionModule>();
   return {
     detectHostEnvironment,
     isInHost: () => detectHostEnvironment() !== "standalone",
-    // Re-export the cache-reset and demo-mode resolver so the test can
-    // reset between cases.
     isDemoMode: () => {
       const flag = configHolder.features.demoMode;
       if (flag === "on") return true;
@@ -59,9 +50,9 @@ vi.mock("@shared/api/host-connection.ts", async (importOriginal) => {
 });
 
 // Deferred imports: demo-mode modules must observe the config/host mocks above.
-const { isDemoMode } = await import("@shared/api/host-connection.ts");
+const { isDemoMode } = await import("@shared/chain/host-connection.ts");
 const { DEMO_REGISTRY_ADDRESS, resolveEffectiveRegistryAddress } = await import(
-  "@shared/demo/demo-contracts.ts"
+  "@shared/lib/demo/demo-contracts.ts"
 );
 
 beforeEach(() => {
@@ -73,8 +64,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.clearAllMocks();
 });
-
-// ── isDemoMode() ─────────────────────────────────────────────────
 
 describe("isDemoMode()", () => {
   it("returns true outside a host in auto mode", () => {
@@ -108,8 +97,6 @@ describe("isDemoMode()", () => {
   });
 });
 
-// ── DEMO_MERCHANT_SEED ───────────────────────────────────────────
-
 describe("DEMO_MERCHANT_SEED", () => {
   it("contains rows spanning POS and t3rminal kinds", () => {
     const kinds = new Set(DEMO_MERCHANT_SEED.map((r) => merchantFromRegistryRow(r).kind));
@@ -137,8 +124,6 @@ describe("DEMO_MERCHANT_SEED", () => {
     expect(keys.size).toBe(DEMO_MERCHANT_SEED.length);
   });
 });
-
-// ── Pure reducers ────────────────────────────────────────────────
 
 const ACC_A: AccountId32Hex =
   "0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789";
@@ -314,8 +299,6 @@ describe("applyDelete", () => {
   });
 });
 
-// ── synthesizeTxHash ────────────────────────────────────────────
-
 describe("synthesizeTxHash", () => {
   it("returns 0x + 64 lowercase hex characters", () => {
     const h = synthesizeTxHash();
@@ -328,8 +311,6 @@ describe("synthesizeTxHash", () => {
     expect(seen.size).toBe(16);
   });
 });
-
-// ── getDemoTokenBalance ────────────────────────────────────────
 
 describe("getDemoTokenBalance", () => {
   it("is deterministic for the same address", () => {
@@ -350,13 +331,11 @@ describe("getDemoTokenBalance", () => {
     expect(balance).toBeGreaterThanOrEqual(0n);
   });
 });
-// ── DEMO_REGISTRY_ADDRESS + resolveEffectiveRegistryAddress ─────
 
 describe("DEMO_REGISTRY_ADDRESS", () => {
   it("is a lowercase 20-byte H160 with the `dead` marker", () => {
     expect(DEMO_REGISTRY_ADDRESS).toMatch(/^0x[0-9a-f]{40}$/);
-    // Marker keeps the demo placeholder visually distinguishable from a
-    // real deployment address in screenshots and clipboard copies.
+    // Marker keeps the demo placeholder distinguishable from a real address.
     expect(DEMO_REGISTRY_ADDRESS.includes("dead")).toBe(true);
   });
 });

@@ -1,27 +1,15 @@
-/**
- * Reports tab — top-level wrapper that switches between two segments:
- *
- *   1. Transactions — a windowed, per-terminal-fanned-out stream of
- *      decrypted DailyReport transactions across every registered
- *      T3rminal merchant. Default segment.
- *   2. Daily reports — the original terminal list with per-row counts
- *      and links into the per-terminal drill-in.
- *
- * Both segments read from the same `useAllTerminalReportIndices` fan-out
- * — the Transactions stream uses the indices to know which `(shopKey,
- * date)` pairs to decrypt; the daily-reports list uses the same indices
- * to render row metadata. The fan-out happens once.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useMemo, useState } from "react";
 
-import { useMerchants } from "@features/merchant/api/use-merchants.ts";
-import { envConfig } from "@shared/config.ts";
-import { resolveNetwork } from "@shared/api/host";
+import { useMerchants } from "@features/merchant/contracts/use-merchants.ts";
+import { envConfig } from "@/config";
+import { resolveNetwork } from "@shared/chain/host";
 import {
   useAllTerminalReportIndices,
   type TerminalReportIndex,
-} from "@features/reports/api/report-index-queries.ts";
+} from "@features/reports/contracts/report-index-queries.ts";
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
 import { useT3rminalAssignments } from "@shared/store/use-assignments-store.ts";
 import type { TransactionsStreamTerminal } from "@features/reports/transaction-stream.ts";

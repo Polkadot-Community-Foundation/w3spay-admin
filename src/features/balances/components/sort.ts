@@ -1,11 +1,5 @@
-/**
- * Pure sort comparator factory for the Balances tab.
- *
- * Sort by name, status, recency, or current token balance. The balance
- * comparator reads from the caller-provided `balances` map so it can
- * sort live results without rerunning the sort whenever a single row's
- * loading flag flips.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import type { AdminMerchant } from "@features/merchant/merchant-model.ts";
 

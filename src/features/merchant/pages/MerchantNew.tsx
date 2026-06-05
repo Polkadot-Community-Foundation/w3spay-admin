@@ -1,20 +1,9 @@
-/**
- * Merchants tab — registration form for a new terminal.
- *
- * The form accepts an SS58 account, a 0x-prefixed AccountId32 (32
- * bytes), or a revive H160 address as the payout destination. The host
- * normalizes the input to a canonical AccountId32 hex string before
- * calling `registerMerchant` on chain.
- *
- * Owns its own form state — the form clears on mount (each visit is a
- * fresh submission). Uses `useMerchantWriteOps().writes` for the
- * registry write and `useRouter().navigate` for post-submit transition
- * to the new merchant's detail screen.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { useEffect, useState } from "react";
 
-import { useMerchantWriteOps } from "@features/merchant/api/use-merchant-write-ops.ts";
+import { useMerchantWriteOps } from "@features/merchant/contracts/use-merchant-write-ops.ts";
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { Icon } from "@shared/components/Icon.tsx";
 import {
@@ -29,13 +18,6 @@ import {
 import { COLOR, FONT } from "@shared/components/tokens.ts";
 import type { MerchantForm, MerchantFormErrors, MerchantKind } from "@features/merchant/merchant-model.ts";
 
-/**
- * Default merchant group for the pilot deploy. Pre-filling the field
- * removes a per-registration keystroke; operators can still overwrite
- * it before submission for non-funkhaus merchants. Used for both POS
- * and T3rminal kinds because in this pilot every terminal joins the
- * same merchant group.
- */
 const DEFAULT_MERCHANT_ID = "funkhaus";
 
 const BLANK_FORM: MerchantForm = {
@@ -58,9 +40,7 @@ export function MerchantNew({ mode }: MerchantNewProps) {
   const [form, setForm] = useState<MerchantForm>(BLANK_FORM);
   const [errors, setErrors] = useState<MerchantFormErrors>({});
 
-  // Each visit to the new-merchant form starts from a clean slate. The
-  // mode dependency clears the form when the user picks a different
-  // kind without unmounting.
+  // The mode dependency clears the form when the user switches kind without unmounting.
   useEffect(() => {
     setForm(BLANK_FORM);
     setErrors({});

@@ -1,4 +1,7 @@
-import type { MerchantRegistryReadState } from "@features/merchant/api/merchant-queries.ts";
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
+
+import type { MerchantRegistryReadState } from "@features/merchant/contracts/merchant-queries.ts";
 
 export function RegistryShell({ registry }: { registry: MerchantRegistryReadState }) {
   if (registry.kind === "loading") {

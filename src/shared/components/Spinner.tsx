@@ -1,11 +1,5 @@
-/**
- * Visual loading indicator for in-flight reads.
- *
- * Pairs with the `w3-spin` keyframe in `styles.css`. The SVG draws a partial
- * arc (¾ circle) so the rotation is visible — a full circle would spin
- * imperceptibly. Renders inline so it can sit next to text/amounts without
- * extra wrapper boxes; callers control vertical alignment via flex layout.
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// @paritytech
 
 import { COLOR } from "./tokens.ts";
 
