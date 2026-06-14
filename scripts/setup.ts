@@ -37,7 +37,6 @@ import * as ui from "./lib/ui";
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), "..", "..");
 const ENV_LOCAL = resolve(REPO_ROOT, ".env.local");
 const ENV_FILE = resolve(REPO_ROOT, ".env");
-const MIN_BULLETIN_DEPLOY = "0.10.0";
 const FAUCET_HINT = 'https://faucet.polkadot.io/ (select "Paseo Asset Hub")';
 const RPC_TIMEOUT_MS = 10_000;
 const ONE_PAS = 10n ** 10n; // Asset Hub native token has 10 decimals (networks.ts).
@@ -162,17 +161,6 @@ export function parsePublishFlag(v: string | undefined): boolean {
 
 // ─── Internal helpers ───────────────────────────────────────────────────────
 
-function versionGte(current: string, minimum: string): boolean {
-  const cur = current.split(".").map(Number);
-  const min = minimum.split(".").map(Number);
-  for (let i = 0; i < 3; i += 1) {
-    const a = cur[i] ?? 0;
-    const b = min[i] ?? 0;
-    if (a !== b) return a > b;
-  }
-  return true;
-}
-
 function short(s: string): string {
   return s.length > 13 ? `${s.slice(0, 8)}…${s.slice(-4)}` : s;
 }
@@ -207,7 +195,6 @@ function accountFromSeed(seed: string): { ss58: string; h160: `0x${string}` } {
 function phaseEnvironment(flags: SetupFlags): void {
   ui.heading("Environment");
   const blockers: string[] = [];
-  const bulletinFix = "npm install -g bulletin-deploy@latest";
 
   const nodeMajor = Number(process.versions.node.split(".")[0]);
   if (nodeMajor >= 22) ui.success(`Node ${process.versions.node}`);
@@ -216,21 +203,19 @@ function phaseEnvironment(flags: SetupFlags): void {
     blockers.push("Upgrade Node to >= 22.");
   }
 
-  const probe = spawnSync("bulletin-deploy", ["--version"], { encoding: "utf8", stdio: "pipe" });
-  const found = (probe.stdout ?? "").match(/([0-9]+)\.([0-9]+)\.([0-9]+)/)?.[0];
-  if (probe.error || probe.status !== 0 || !found) {
-    if (flags.skipApp) ui.warn(`bulletin-deploy not found — ignored (--skip-app). Install before publishing: ${bulletinFix}`);
-    else {
-      ui.error("bulletin-deploy not found on PATH");
-      blockers.push(bulletinFix);
+  // The deploy CLI is `@polkadot-community-foundation/polkadot-app-deploy`.
+  // deploy.sh uses a globally-installed binary when present and otherwise
+  // fetches it with a pinned `npx`, so a missing global install is NOT a
+  // blocker here — just report which path the publish step will take. Skipped
+  // entirely under --skip-app (registry-only run, no publish).
+  if (!flags.skipApp) {
+    const probe = spawnSync("polkadot-app-deploy", ["--version"], { encoding: "utf8", stdio: "pipe" });
+    const found = (probe.stdout ?? "").match(/([0-9]+)\.([0-9]+)\.([0-9]+)/)?.[0];
+    if (probe.error || probe.status !== 0 || !found) {
+      ui.success("polkadot-app-deploy will be fetched on demand via npx (@0.10.1)");
+    } else {
+      ui.success(`polkadot-app-deploy ${found} (global)`);
     }
-  } else if (versionGte(found, MIN_BULLETIN_DEPLOY)) {
-    ui.success(`bulletin-deploy ${found}`);
-  } else if (flags.skipApp) {
-    ui.warn(`bulletin-deploy ${found} < ${MIN_BULLETIN_DEPLOY} — ignored (--skip-app). ${bulletinFix}`);
-  } else {
-    ui.error(`bulletin-deploy ${found} < ${MIN_BULLETIN_DEPLOY}`);
-    blockers.push(bulletinFix);
   }
 
   if (!existsSync(resolve(REPO_ROOT, "contracts", "node_modules"))) {
@@ -351,9 +336,16 @@ async function phaseConfigure(flags: SetupFlags): Promise<Config> {
     if (publishMnemonic) validateMnemonic(publishMnemonic, "Publisher mnemonic", false);
   }
 
+  // Summit has no Publisher (Browse directory) registry — `--publish` is a
+  // non-op there. Force it off and don't prompt so the review/summary never
+  // claims a listing that can't happen.
+  const isSummit = networkKey === "summit";
   const publishDefault = flags.publish ?? parsePublishFlag(process.env.BULLETIN_DEPLOY_PUBLISH);
   let publishToBrowse = flags.skipApp ? false : publishDefault;
-  if (!flags.skipApp && flags.publish === undefined && !flags.yes && !flags.dryRun) {
+  if (isSummit) {
+    if (publishDefault) ui.warn("Publish ignored on summit (no Publisher registry).");
+    publishToBrowse = false;
+  } else if (!flags.skipApp && flags.publish === undefined && !flags.yes && !flags.dryRun) {
     publishToBrowse = await ui.confirm(
       "Publish to the Browse directory? (lists the .dot in the on-chain Publisher registry; paseo-next-v2 only)",
       publishDefault,
