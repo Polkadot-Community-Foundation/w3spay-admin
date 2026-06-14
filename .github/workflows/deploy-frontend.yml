@@ -63,13 +63,13 @@ jobs:
         id: target
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "domain=pr${{ github.event.pull_request.number }}-w3spayadmin01.dot" >> "$GITHUB_OUTPUT"
+            echo "domain=pr${{ github.event.pull_request.number }}-w3spayadmin.dot" >> "$GITHUB_OUTPUT"
             echo "env=paseo-next-v2" >> "$GITHUB_OUTPUT"
             echo "registry=${{ vars.VITE_W3SPAY_REGISTRY_ADDRESS_PASEO || '0x70f6a449d770931419cfa8d8412e3a5d6377e905' }}" >> "$GITHUB_OUTPUT"
             # Reports surface — paseo Bulletin index. Empty disables Reports.
             echo "t3rminal=${{ vars.VITE_T3RMINAL_BULLETIN_INDEX_ADDRESS_PASEO || '0x3467596e99D24E62Ae5525DEAd280de2cAA735e4' }}" >> "$GITHUB_OUTPUT"
           else
-            echo "domain=w3spayadmin01.dot" >> "$GITHUB_OUTPUT"
+            echo "domain=w3spayadmin.dot" >> "$GITHUB_OUTPUT"
             echo "env=summit" >> "$GITHUB_OUTPUT"
             # Summit W3SPayRegistry address. REQUIRED — set the repo variable
             # VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT once the registry has been
@@ -100,7 +100,7 @@ jobs:
           command: ./deploy.sh "${{ steps.target.outputs.domain }}"
         env:
           # On Summit this MUST be the Bulletin-authorized uploader (e.g. 5Fk8…)
-          # that owns w3spayadmin01.dot — it signs both the Bulletin upload and
+          # that owns w3spayadmin.dot — it signs both the Bulletin upload and
           # the DotNS bind. On paseo previews it just needs paseo funds.
           MNEMONIC: ${{ secrets.DOTNS_MNEMONIC }}
           BULLETIN_ENV: ${{ steps.target.outputs.env }}
@@ -114,7 +114,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const domain = `pr${{ github.event.pull_request.number }}-w3spayadmin01`;
+            const domain = `pr${{ github.event.pull_request.number }}-w3spayadmin`;
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
             await github.rest.issues.createComment({
               owner: context.repo.owner,
