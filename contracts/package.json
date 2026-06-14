@@ -9,6 +9,7 @@
     "test:coverage": "hardhat coverage",
     "deploy": "hardhat compile && tsx scripts/deploy-registry.ts",
     "deploy:paseo-next-v2": "hardhat compile && tsx scripts/deploy-registry.ts --env paseo-next-v2",
+    "deploy:summit": "hardhat compile && tsx scripts/deploy-registry.ts --env summit",
     "deploy:previewnet": "hardhat compile && tsx scripts/deploy-registry.ts --env previewnet",
     "registry:add-admin": "hardhat compile && tsx scripts/w3spay-add-registry-admin.ts",
     "registry:add-super-admin": "hardhat compile && tsx scripts/w3spay-add-registry-super-admin.ts",
