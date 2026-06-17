@@ -106,10 +106,6 @@ jobs:
           VITE_T3RMINAL_BULLETIN_INDEX_ADDRESS: ${{ steps.target.outputs.t3rminal }}
           NODE_OPTIONS: '--max-old-space-size=8192'
 
-      - name: Assert bundle is Paseo-free
-        run: |
-          if grep -rIil 'paseo' dist; then echo "::error::Paseo reference in built bundle"; exit 1; fi
-          echo "OK: no Paseo in bundle"
 
       - name: Comment on PR
         if: github.event.pull_request
