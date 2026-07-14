@@ -38,7 +38,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/dist"
-BULLETIN_ENV="${BULLETIN_ENV:-paseo-next-v2}"
+BULLETIN_ENV="${BULLETIN_ENV:-devnet}"
 # `BULLETIN_DEPLOY_PUBLISH` is resolved in two phases: shell env here, .env
 # fallback after `_read_envfile_key` is defined. Left empty for now so the
 # fallback can tell an unset var from an explicit value; the `false` default
@@ -231,10 +231,10 @@ export VITE_W3SPAY_REGISTRY_ADDRESS="$RESOLVED_REGISTRY_ADDRESS"
 export VITE_DOTNS_PRODUCT_DOMAIN="$TARGET"
 export VITE_NETWORK="${VITE_NETWORK:-$BULLETIN_ENV}"
 case "$VITE_NETWORK" in
-  paseo|paseo-next-v2|previewnet|summit) ;;
+  paseo|paseo-next-v2|previewnet|summit|devnet) ;;
   *)
     echo "Error: VITE_NETWORK=\"$VITE_NETWORK\" is not supported."
-    echo "Expected one of: paseo, paseo-next-v2, previewnet, summit."
+    echo "Expected one of: paseo, paseo-next-v2, previewnet, summit, devnet."
     exit 1
     ;;
 esac
