@@ -79,7 +79,7 @@ jobs:
           # writes permissionless). Override/clear via the repo variable.
           echo "t3rminal=${{ vars.VITE_T3RMINAL_BULLETIN_INDEX_ADDRESS_SUMMIT || '0x10acbce7ea2fb859ef7c2caab29c0babb8b91803' }}" >> "$GITHUB_OUTPUT"
 
-      - name: Check Summit registry is configured
+      - name: Check devnet registry is configured
         run: |
           if [ -z "${{ steps.target.outputs.registry }}" ]; then
             echo "::error::VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT repo variable is empty."
@@ -118,5 +118,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `**${domain}.dot** (Summit preview) · [logs](${runUrl})\n\nhttps://${domain}.dot.li`
+              body: `**${domain}.dot** (devnet preview) · [logs](${runUrl})\n\nhttps://${domain}.dot.li`
             });
