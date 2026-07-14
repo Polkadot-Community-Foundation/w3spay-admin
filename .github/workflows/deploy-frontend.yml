@@ -69,7 +69,7 @@ jobs:
           else
             echo "domain=w3spayadmin.dot" >> "$GITHUB_OUTPUT"
           fi
-          echo "env=summit" >> "$GITHUB_OUTPUT"
+          echo "env=devnet" >> "$GITHUB_OUTPUT"
           # Summit W3SPayRegistry address. REQUIRED — set the repo variable
           # VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT once the registry has been
           # deployed on Summit AH (npm run deploy:summit --prefix contracts).
