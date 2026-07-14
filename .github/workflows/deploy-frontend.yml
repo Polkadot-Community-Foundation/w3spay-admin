@@ -61,20 +61,19 @@ jobs:
       - name: Resolve deploy target
         id: target
         run: |
-          # PCF CI is Summit-only: every branch (incl. PR previews) targets
-          # Summit using the SAME Summit registry/t3rminal addresses. No path
-          # ever sets paseo-next-v2.
+          # PCF CI is devnet-only: every branch (incl. PR previews) targets the
+          # public products devnet (Paseo AH 1000/People 1004/Bulletin 1010)
+          # using the SAME devnet registry/t3rminal addresses.
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "domain=pr${{ github.event.pull_request.number }}-w3spayadmin.dot" >> "$GITHUB_OUTPUT"
           else
             echo "domain=w3spayadmin.dot" >> "$GITHUB_OUTPUT"
           fi
-          echo "env=summit" >> "$GITHUB_OUTPUT"
-          # Summit W3SPayRegistry address. REQUIRED — set the repo variable
-          # VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT once the registry has been
-          # deployed on Summit AH (npm run deploy:summit --prefix contracts).
-          # deploy.sh refuses to ship a build without a valid H160 here.
-          echo "registry=${{ vars.VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT }}" >> "$GITHUB_OUTPUT"
+          echo "env=devnet" >> "$GITHUB_OUTPUT"
+          # Devnet W3SPayRegistry address (live on Paseo AH 1000). The repo
+          # variable VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT still overrides; the
+          # hardcoded fallback keeps the var name stable while wiring devnet.
+          echo "registry=${{ vars.VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT || '0x950c0243cb112abe1112924f1fcab04fb03ae670' }}" >> "$GITHUB_OUTPUT"
           # Reports surface — live Summit T3rminalBulletinIndex (ownerless,
           # writes permissionless). Override/clear via the repo variable.
           echo "t3rminal=${{ vars.VITE_T3RMINAL_BULLETIN_INDEX_ADDRESS_SUMMIT || '0x10acbce7ea2fb859ef7c2caab29c0babb8b91803' }}" >> "$GITHUB_OUTPUT"

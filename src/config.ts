@@ -7,7 +7,7 @@ import type { EnvConfig } from "@shared/lib/config";
 
 export type { EnvConfig, TokenLocation } from "@shared/lib/config";
 
-const DEFAULT_ADMIN_NETWORK: NetworkKey = "paseo-next-v2";
+const DEFAULT_ADMIN_NETWORK: NetworkKey = "devnet";
 
 function readDemoMode(): EnvConfig["features"]["demoMode"] {
   const value = envString("VITE_DEMO_MODE", "auto").trim().toLowerCase();
@@ -26,7 +26,9 @@ function readEnv(): EnvConfig {
 
   return {
     contracts: {
-      merchantRegistryAddress: envString("VITE_W3SPAY_REGISTRY_ADDRESS", "0xff3b3e8cc1c6bc8a67ae933dc238595c2cc6402b"),
+      // Default is the live devnet W3SPayRegistry on Paseo AH 1000. Overridden
+      // per deploy by VITE_W3SPAY_REGISTRY_ADDRESS (CI sets it from the repo var).
+      merchantRegistryAddress: envString("VITE_W3SPAY_REGISTRY_ADDRESS", "0x950c0243cb112abe1112924f1fcab04fb03ae670"),
       // Default is the Bulletin index contract address on Paseo Asset Hub
       // Next v2 (the chain the report producer writes to).
       t3rminalBulletinIndexAddress: envString(
