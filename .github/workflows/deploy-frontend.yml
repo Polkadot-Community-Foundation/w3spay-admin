@@ -61,30 +61,30 @@ jobs:
       - name: Resolve deploy target
         id: target
         run: |
-          # PCF CI is Summit-only: every branch (incl. PR previews) targets
-          # Summit using the SAME Summit registry/t3rminal addresses. No path
-          # ever sets paseo-next-v2.
+          # PCF CI targets the public products devnet (standard Paseo AH 1000 /
+          # People 1004 / Bulletin 1010): every branch (incl. PR previews) uses
+          # the SAME devnet registry/t3rminal addresses.
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "domain=pr${{ github.event.pull_request.number }}-w3spayadmin.dot" >> "$GITHUB_OUTPUT"
           else
             echo "domain=w3spayadmin.dot" >> "$GITHUB_OUTPUT"
           fi
-          echo "env=summit" >> "$GITHUB_OUTPUT"
-          # Summit W3SPayRegistry address. REQUIRED — set the repo variable
-          # VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT once the registry has been
-          # deployed on Summit AH (npm run deploy:summit --prefix contracts).
-          # deploy.sh refuses to ship a build without a valid H160 here.
-          echo "registry=${{ vars.VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT }}" >> "$GITHUB_OUTPUT"
-          # Reports surface — live Summit T3rminalBulletinIndex (ownerless,
-          # writes permissionless). Override/clear via the repo variable.
-          echo "t3rminal=${{ vars.VITE_T3RMINAL_BULLETIN_INDEX_ADDRESS_SUMMIT || '0x10acbce7ea2fb859ef7c2caab29c0babb8b91803' }}" >> "$GITHUB_OUTPUT"
+          echo "env=devnet" >> "$GITHUB_OUTPUT"
+          # Devnet W3SPayRegistry on Paseo AH 1000 (owner 0x8C78). Override via
+          # the repo variable VITE_W3SPAY_REGISTRY_ADDRESS_DEVNET after a
+          # registry redeploy; otherwise this known-good default is baked.
+          echo "registry=${{ vars.VITE_W3SPAY_REGISTRY_ADDRESS_DEVNET || '0x950c0243cb112abe1112924f1fcab04fb03ae670' }}" >> "$GITHUB_OUTPUT"
+          # Reports surface — devnet T3rminalBulletinIndex (none deployed yet;
+          # the Reports tab degrades gracefully). Set the repo variable once one
+          # lands on devnet.
+          echo "t3rminal=${{ vars.VITE_T3RMINAL_BULLETIN_INDEX_ADDRESS_DEVNET }}" >> "$GITHUB_OUTPUT"
 
-      - name: Check Summit registry is configured
+      - name: Check devnet registry is configured
         run: |
           if [ -z "${{ steps.target.outputs.registry }}" ]; then
-            echo "::error::VITE_W3SPAY_REGISTRY_ADDRESS_SUMMIT repo variable is empty."
-            echo "Deploy the W3SPayRegistry on Summit first (see contracts/ + dossier),"
-            echo "then set the repo variable to its H160 address and re-run."
+            echo "::error::devnet W3SPayRegistry address is empty."
+            echo "Deploy the W3SPayRegistry on devnet AH first (see contracts/ + dossier),"
+            echo "then set VITE_W3SPAY_REGISTRY_ADDRESS_DEVNET to its H160 and re-run."
             exit 1
           fi
 

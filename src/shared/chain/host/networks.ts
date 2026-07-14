@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // @paritytech
 
-export type NetworkKey = "paseo" | "paseo-next-v2" | "previewnet" | "summit";
+export type NetworkKey = "paseo" | "paseo-next-v2" | "previewnet" | "summit" | "devnet";
 
 export const SUPPORTED_NETWORKS: NetworkKey[] = [
   "paseo",
   "paseo-next-v2",
   "previewnet",
   "summit",
+  "devnet",
 ];
 export const DEFAULT_NETWORK: NetworkKey = "paseo";
 
@@ -59,6 +60,34 @@ export interface NetworkConfig {
 }
 
 export const NETWORKS: Record<NetworkKey, NetworkConfig> = {
+  // PCF public products devnet — standard Paseo system chains (AH 1000 /
+  // People 1004 / Bulletin 1010), gateway dev-dot.li. Genesis hashes from the
+  // summit-net-deployments/DEVNET register (chain_getBlockHash(0)).
+  devnet: {
+    key: "devnet",
+    displayName: "Paseo Asset Hub (devnet)",
+    isTestnet: true,
+    mainChain: {
+      wsUrl: "wss://asset-hub-paseo-rpc.n.dwellir.com",
+      genesisHash:
+        "0xd6eec26135305a8ad257a20d003357284c8aa03d0bdb2b357ab0a22371e11ef2",
+    },
+    bulletinChain: {
+      wsUrl: "wss://bulletin-paseo.tservices.es:8443",
+      genesisHash:
+        "0xe101f0fa4627d29a257645e02be86d80378fea1a2bf8fa6a918d150ebc760a59",
+    },
+    peopleChain: {
+      wsUrl: "wss://people-paseo.rotko.net",
+      genesisHash:
+        "0xe6c30d6e148f250b887105237bcaa5cb9f16dd203bf7b5b9d4f1da7387cb86ec",
+    },
+    // Devnet Bulletin HTTP IPFS gateway is still pending (see the DEVNET
+    // register). Fall back to a public gateway until one lands; override per
+    // deploy via VITE_BULLETIN_IPFS_GATEWAY.
+    ipfsGateway: "https://dweb.link",
+    nativeToken: { symbol: "PAS", decimals: 10 },
+  },
   paseo: {
     key: "paseo",
     displayName: "Paseo Asset Hub",
